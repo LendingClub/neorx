@@ -2,7 +2,6 @@ package io.macgyver.neorx.impl;
 
 import java.util.Iterator;
 
-import org.assertj.core.util.Preconditions;
 
 import io.macgyver.neorx.ResultMetaData;
 import io.macgyver.neorx.Row;
