@@ -1,10 +1,9 @@
-package io.macgyver.neorx.impl;
+package io.macgyver.neorx.rest.impl;
 
 import java.util.Iterator;
 
-
-import io.macgyver.neorx.ResultMetaData;
-import io.macgyver.neorx.Row;
+import io.macgyver.neorx.rest.ResultMetaData;
+import io.macgyver.neorx.rest.Row;
 import rx.Observable;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;

@@ -11,9 +11,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.macgyver.neorx;
+package io.macgyver.neorx.rest;
 
-import io.macgyver.neorx.NeoRxClient;
+import io.macgyver.neorx.rest.NeoRxClient;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;

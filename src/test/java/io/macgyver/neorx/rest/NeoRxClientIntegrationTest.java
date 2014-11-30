@@ -11,15 +11,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.macgyver.neorx;
+package io.macgyver.neorx.rest;
+
+import io.macgyver.neorx.rest.NeoRxClient;
+import io.macgyver.neorx.rest.Row;
 
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import rx.Observable;
 import rx.functions.Action1;
 
-public class NeoRxClientIntegrationTest extends Neo4jIntegrationTest {
+public class NeoRxClientIntegrationTest extends RxNeo4jIntegrationTest {
 
 	Logger logger = LoggerFactory.getLogger(NeoRxClientIntegrationTest.class);
 	@Test
@@ -35,11 +39,19 @@ public class NeoRxClientIntegrationTest extends Neo4jIntegrationTest {
 				
 			}
 		};
-		client.execCypher("match (m:Test) return m,m.abc").subscribe(act);
+		
+		
+		Observable<Row> r = client.execCypher("match (m:Test) return m,m.abc");
+		
+	
+		r.subscribe(act);
+		r.subscribe(act);
 		
 		
 		
-		client.execCypher("create (m:Test {abc:1})");
+		
+		
+		
 	
 	
 

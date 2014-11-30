@@ -1,6 +1,6 @@
-package io.macgyver.neorx.impl;
+package io.macgyver.neorx.rest.impl;
 
-import io.macgyver.neorx.Row;
+import io.macgyver.neorx.rest.Row;
 
 import java.util.Iterator;
 

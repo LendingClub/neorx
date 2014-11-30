@@ -1,7 +1,7 @@
-package io.macgyver.neorx.impl;
+package io.macgyver.neorx.rest.impl;
 
-import io.macgyver.neorx.ResultMetaData;
-import io.macgyver.neorx.Row;
+import io.macgyver.neorx.rest.ResultMetaData;
+import io.macgyver.neorx.rest.Row;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;

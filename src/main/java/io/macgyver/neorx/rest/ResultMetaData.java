@@ -1,4 +1,4 @@
-package io.macgyver.neorx;
+package io.macgyver.neorx.rest;
 
 import java.util.List;
 

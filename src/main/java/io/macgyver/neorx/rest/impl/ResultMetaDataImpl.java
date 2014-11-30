@@ -1,6 +1,6 @@
-package io.macgyver.neorx.impl;
+package io.macgyver.neorx.rest.impl;
 
-import io.macgyver.neorx.ResultMetaData;
+import io.macgyver.neorx.rest.ResultMetaData;
 
 import java.util.Iterator;
 import java.util.List;

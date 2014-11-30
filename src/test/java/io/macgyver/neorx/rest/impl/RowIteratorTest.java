@@ -1,7 +1,9 @@
-package io.macgyver.neorx.impl;
+package io.macgyver.neorx.rest.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import io.macgyver.neorx.Row;
+import io.macgyver.neorx.rest.Row;
+import io.macgyver.neorx.rest.impl.ResultMetaDataImpl;
+import io.macgyver.neorx.rest.impl.RowIterator;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;

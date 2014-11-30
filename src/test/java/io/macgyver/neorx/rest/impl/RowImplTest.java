@@ -1,6 +1,8 @@
-package io.macgyver.neorx.impl;
+package io.macgyver.neorx.rest.impl;
 
-import io.macgyver.neorx.Row;
+import io.macgyver.neorx.rest.Row;
+import io.macgyver.neorx.rest.impl.ResultMetaDataImpl;
+import io.macgyver.neorx.rest.impl.RowImpl;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;

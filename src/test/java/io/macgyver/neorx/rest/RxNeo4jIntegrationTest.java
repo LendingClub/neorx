@@ -11,13 +11,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.macgyver.neorx;
+package io.macgyver.neorx.rest;
+
+import io.macgyver.neorx.rest.NeoRxClient;
 
 import org.junit.Assume;
 import org.junit.Before;
 import org.slf4j.LoggerFactory;
 
-public class Neo4jIntegrationTest {
+public class RxNeo4jIntegrationTest {
 
 	protected org.slf4j.Logger logger = LoggerFactory.getLogger(getClass());
 	static Boolean available=null;

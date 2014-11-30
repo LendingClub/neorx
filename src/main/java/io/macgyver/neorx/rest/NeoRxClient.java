@@ -11,10 +11,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.macgyver.neorx;
+package io.macgyver.neorx.rest;
 
-import io.macgyver.neorx.impl.NonStreamingResultImpl;
-import io.macgyver.neorx.impl.SslTrust;
+import io.macgyver.neorx.rest.impl.NonStreamingResultImpl;
+import io.macgyver.neorx.rest.impl.SslTrust;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -95,6 +95,7 @@ public class NeoRxClient {
 		}
 		builder = builder.setConnectionTimeoutInMs(5000);
 		AsyncHttpClient asyncClient = new AsyncHttpClient(builder.build());
+		
 		return asyncClient;
 	}
 
@@ -272,6 +273,9 @@ public class NeoRxClient {
 		return validateCertificates;
 	}
 
+	public void close() {
+		getClient().close();
+	}
 	public void setCertificateValidationEnabled(boolean validateCertificates) {
 		this.validateCertificates = validateCertificates;
 	}
