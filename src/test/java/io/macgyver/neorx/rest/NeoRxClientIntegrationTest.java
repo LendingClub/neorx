@@ -13,23 +13,15 @@
  */
 package io.macgyver.neorx.rest;
 
-import java.util.List;
-
-import io.macgyver.neorx.rest.NeoRxClient;
-import io.macgyver.neorx.rest.Row;
-
-import org.assertj.core.util.Strings;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-
-import rx.Observable;
-import rx.functions.Action1;
-import rx.functions.Func1;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class NeoRxClientIntegrationTest extends RxNeo4jIntegrationTest {
+
+	
 
 	Logger logger = LoggerFactory.getLogger(NeoRxClientIntegrationTest.class);
 	@Test
@@ -38,32 +30,21 @@ public class NeoRxClientIntegrationTest extends RxNeo4jIntegrationTest {
 		
 		NeoRxClient c = getClient();
 		
-		for (Row r: c.execCypher("match (m:Person) where m.born>{born} return m","born",1960).toBlocking().toIterable()) {
-			System.out.println(r.getField("m").path("name").asText());
+		for (ObjectNode r: c.execCypher("match (m:Person) where m.born>{born} return m.born, m","born",1960).toBlocking().toIterable()) {
+			System.out.println(r);
 		}
 		
 		
-		Func1<Row,Observable<String>> x = new Func1<Row,Observable<String>>() {
-
-			@Override
-			public Observable<String> call(Row t1) {
-				
-				String s = t1.getField("m").path("name").asText();
-				if (Strings.isNullOrEmpty(s)) {
-					return Observable.empty();
-				}
-				return Observable.just(s);
-			}
-		};
 		
 		
-		List<String> list = Lists.newArrayList(c.execCypher("match m return m").flatMap(x).distinct().toBlocking().toIterable());
+		/*
 		
+		List<ObjectNode> list = Lists.newArrayList(c.execCypher("match m return m").flatMap(Transforms.extractObjectNode("m")).distinct().toBlocking().toIterable());
 		
 		
 		System.out.println(list);
 		
-		
+		*/
 		
 		
 		

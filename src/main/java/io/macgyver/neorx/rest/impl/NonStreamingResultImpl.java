@@ -3,7 +3,7 @@ package io.macgyver.neorx.rest.impl;
 import java.util.Iterator;
 
 import io.macgyver.neorx.rest.ResultMetaData;
-import io.macgyver.neorx.rest.Row;
+
 import rx.Observable;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -29,11 +29,11 @@ public class NonStreamingResultImpl  {
 	public ResultMetaData getResultMetaData() {
 		return metaData;
 	}
-	public Iterable<Row> iterableRows() {
-		return new Iterable<Row>() {
+	public Iterable<ObjectNode> iterableRows() {
+		return new Iterable<ObjectNode>() {
 			
 			@Override
-			public Iterator<Row> iterator() {
+			public Iterator<ObjectNode> iterator() {
 				
 				
 				return new RowIterator(data,metaData);
@@ -44,7 +44,7 @@ public class NonStreamingResultImpl  {
 	public int size() {
 		return data.path("data").size();
 	}
-	public Observable<Row> rows() {
+	public Observable<ObjectNode> rows() {
 		return Observable.from(iterableRows());
 	}
 }

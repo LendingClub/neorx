@@ -1,9 +1,6 @@
 package io.macgyver.neorx.rest.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import io.macgyver.neorx.rest.Row;
-import io.macgyver.neorx.rest.impl.ResultMetaDataImpl;
-import io.macgyver.neorx.rest.impl.RowIterator;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
@@ -29,10 +26,10 @@ public class RowIteratorTest {
 
 		Assertions.assertThat(ri.hasNext()).isTrue();
 
-		Row x1 = ri.next();
-		Assertions.assertThat(x1).isInstanceOf(Row.class);
-		Assertions.assertThat(x1.getString("m.abc")).isEqualTo("123");
-		Assertions.assertThat(x1.getField("m").get("abc").asText()).isEqualTo(
+		ObjectNode x1 = ri.next();
+	
+		Assertions.assertThat(x1.path("m.abc").asText()).isEqualTo("123");
+		Assertions.assertThat(x1.path("m").path("abc").asText()).isEqualTo(
 				"123");
 
 	}
@@ -52,17 +49,17 @@ public class RowIteratorTest {
 		RowIterator ri = new RowIterator(n.get("results").get(0).get("data"),
 				md);
 
-		Row r = ri.next();
-		assertThat(r.getField("name").asText()).isEqualTo("Rob");
-		assertThat(r.getString("name")).isEqualTo("Rob");
-		assertThat(r.getString("age")).isEqualTo("39");
-		assertThat(r.getField("age").asInt()).isEqualTo(39);
+		ObjectNode r = ri.next();
+		assertThat(r.get("name").asText()).isEqualTo("Rob");
+		assertThat(r.get("name")).isEqualTo("Rob");
+		assertThat(r.get("age")).isEqualTo("39");
+		assertThat(r.get("age").asInt()).isEqualTo(39);
 		r = ri.next();
 
-		assertThat(r.getField("name").asText()).isEqualTo("Oliver");
-		assertThat(r.getString("name")).isEqualTo("Oliver");
-		assertThat(r.getString("age")).isEqualTo("9");
-		assertThat(r.getField("age").asInt()).isEqualTo(9);
+		assertThat(r.get("name").asText()).isEqualTo("Oliver");
+		assertThat(r.get("name")).isEqualTo("Oliver");
+		assertThat(r.get("age")).isEqualTo("9");
+		assertThat(r.get("age").asInt()).isEqualTo(9);
 
 		assertThat(ri.hasNext()).isFalse();
 

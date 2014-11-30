@@ -150,14 +150,14 @@ public class NeoRxClient {
 		return n;
 	}
 
-	public Observable<Row> execCypher(String cypher, ObjectNode params) {
+	public Observable<ObjectNode> execCypher(String cypher, ObjectNode params) {
 		ObjectNode response = execCypherWithJsonResponse(cypher, params);
 		Preconditions.checkNotNull(response);
 		return new NonStreamingResultImpl(response).rows();
 
 	}
 
-	public Observable<Row> execCypher(String cypher, Object... params) {
+	public Observable<ObjectNode> execCypher(String cypher, Object... params) {
 		return execCypher(cypher, createParameters(params));
 	}
 
