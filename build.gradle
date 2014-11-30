@@ -41,3 +41,30 @@ dependencies {
 task wrapper(type: Wrapper) {
     gradleVersion = '2.2.1'
 }
+
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            name = 'macgyver-bintray'
+            if (!project.hasProperty('bintrayUser')) {
+                project.ext['bintrayUser']=""
+            }
+            if (!project.hasProperty('bintrayKey')) {
+                project.ext['bintrayKey']=""
+            }
+            repository(id: 'macgyver-bintray', url: 'https://api.bintray.com/maven/robschoening/io-macgyver/neorx'){
+                authentication(userName: bintrayUser, password: bintrayKey)
+			}
+            pom.project {
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+            
+            }
+        }
+    }
+}
