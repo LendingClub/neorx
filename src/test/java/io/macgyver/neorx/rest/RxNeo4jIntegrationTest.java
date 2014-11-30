@@ -35,8 +35,8 @@ public class RxNeo4jIntegrationTest {
 		
 		if (client==null) {
 			client = new NeoRxClient(getNeo4jRestUrl()); 
-			client.setUsername("hello");
-			client.setPassword("world");
+			MovieGraph g = new MovieGraph(client);
+			g.replaceMovieGraph();
 		}
 		return client;
 	}

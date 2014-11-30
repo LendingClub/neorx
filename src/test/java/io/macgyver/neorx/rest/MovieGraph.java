@@ -40,8 +40,9 @@ public class MovieGraph {
 		this.client = c;
 	}
 	
-	public void replaceMovieGraph() throws IOException {
+	public void replaceMovieGraph()  {
 
+		try {
 		client.execCypher("MATCH (n:Person)-[r]-() delete r");
 
 		client.execCypher("MATCH (n:Movie)-[r]-() delete r");
@@ -51,6 +52,10 @@ public class MovieGraph {
 		client.execCypher("MATCH (m:Movie) delete m");
 
 		executeClasspath("movies.cypher");
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public void executeClasspath(String name) throws IOException {
