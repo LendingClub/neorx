@@ -42,7 +42,25 @@ task wrapper(type: Wrapper) {
     gradleVersion = '2.2.1'
 }
 
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
 
+task javadoc(type:Javadoc, overwrite:true) {
+	// needed because of vaadin's habit of keeping source in jars
+}
+	
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+	
+	
+}
+
+artifacts {
+        archives sourcesJar, javadocJar
+}
 uploadArchives {
     repositories {
         mavenDeployer {
