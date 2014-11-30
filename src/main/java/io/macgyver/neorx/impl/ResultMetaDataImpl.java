@@ -1,31 +1,30 @@
 package io.macgyver.neorx.impl;
 
+import io.macgyver.neorx.ResultMetaData;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-import io.macgyver.neorx.ResultMetaData;
 
 public class ResultMetaDataImpl implements ResultMetaData {
 
 	Map<String,Integer> columnMap;
 	List<String> columnNames;
-	ObjectNode response;
-	public ResultMetaDataImpl(ObjectNode response) {
-		this.response = response;
+
+	public ResultMetaDataImpl(JsonNode response) {
 	
+		
 		ArrayNode an = (ArrayNode) response.get("columns");
 		
-	
+		Preconditions.checkNotNull(an);
 		Iterator<JsonNode> t = an.elements();
 		int column=0;
 		Map<String,Integer> map = Maps.newConcurrentMap();

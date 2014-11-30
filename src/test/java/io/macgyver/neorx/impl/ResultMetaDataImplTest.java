@@ -31,5 +31,6 @@ public class ResultMetaDataImplTest {
 		Assertions.assertThat(rmd.getField("v.col1")).isEqualTo(2);
 		
 		
+		
 	}
 }

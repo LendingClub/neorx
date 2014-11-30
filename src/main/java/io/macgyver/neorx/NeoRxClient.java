@@ -20,20 +20,22 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import rx.Observable;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
@@ -62,10 +64,13 @@ public class NeoRxClient {
 	public NeoRxClient(String url) {
 		this(url, null, null, false);
 	}
+
 	public NeoRxClient(String url, String username, String password) {
 		this(url, username, password, false);
 	}
-	public NeoRxClient(String url, String username, String password, AsyncHttpClient client ) {
+
+	public NeoRxClient(String url, String username, String password,
+			AsyncHttpClient client) {
 		Preconditions.checkNotNull(url);
 		Preconditions.checkNotNull(client);
 		this.url = url;
@@ -73,11 +78,12 @@ public class NeoRxClient {
 		this.password = password;
 		this.asyncClient = client;
 	}
+
 	public NeoRxClient(String url, String username, String password,
 			boolean validateCertificates) {
-	
-		this(url,username,password,newClient(validateCertificates));
-		
+
+		this(url, username, password, newClient(validateCertificates));
+
 	}
 
 	private static AsyncHttpClient newClient(boolean validateCertificates) {
@@ -91,16 +97,16 @@ public class NeoRxClient {
 		AsyncHttpClient asyncClient = new AsyncHttpClient(builder.build());
 		return asyncClient;
 	}
-	
+
 	public void setAsyncHttpClient(AsyncHttpClient client) {
 		Preconditions.checkNotNull(client);
-		if (asyncClient!=null && !asyncClient.isClosed()) {
+		if (asyncClient != null && !asyncClient.isClosed()) {
 			asyncClient.close();
 		}
 		asyncClient = client;
 	}
-	protected AsyncHttpClient getClient() {
 
+	protected AsyncHttpClient getClient() {
 
 		return asyncClient;
 	}
@@ -144,18 +150,18 @@ public class NeoRxClient {
 	}
 
 	public Observable<Row> execCypher(String cypher, ObjectNode params) {
-		ObjectNode response = execCypherWithJsonResponse(cypher,
-				params);
+		ObjectNode response = execCypherWithJsonResponse(cypher, params);
+		Preconditions.checkNotNull(response);
 		return new NonStreamingResultImpl(response).rows();
-		
+
 	}
+
 	public Observable<Row> execCypher(String cypher, Object... params) {
 		return execCypher(cypher, createParameters(params));
 	}
 
-	
-
-	protected ObjectNode execCypherWithJsonResponse(String cypher, Object... args) {
+	protected ObjectNode execCypherWithJsonResponse(String cypher,
+			Object... args) {
 		return execCypherWithJsonResponse(cypher, createParameters(args));
 	}
 
@@ -165,8 +171,15 @@ public class NeoRxClient {
 		if (params == null) {
 			params = mapper.createObjectNode();
 		}
-		payload.put("query", cypher);
-		payload.set("params", params);
+
+		ArrayNode statements = mapper.createArrayNode();
+
+		ObjectNode statement = mapper.createObjectNode();
+
+		statement.put("statement", cypher);
+		statement.set("parameters", params);
+		statements.add(statement);
+		payload.set("statements", statements);
 		return payload;
 	}
 
@@ -214,7 +227,7 @@ public class NeoRxClient {
 			AsyncHttpClient c = getClient();
 			Preconditions.checkNotNull(c);
 			BoundRequestBuilder brb = c
-					.preparePost(getUrl() + "/db/data/cypher")
+					.preparePost(getUrl() + "/db/data/transaction/commit")
 					.addHeader("X-Stream", Boolean.toString(streamResponse))
 					.addHeader("Accept", "application/json");
 
@@ -236,7 +249,14 @@ public class NeoRxClient {
 			ListenableFuture<ObjectNode> f = brb.setBody(payloadString)
 					.execute(ch);
 			ObjectNode n = f.get();
-
+			JsonNode error = n.path("errors").path(0);
+			
+		
+			if (error instanceof ObjectNode) {
+		
+				throw new NeoRxException(((ObjectNode)error));
+			}
+			
 			return n;
 
 		} catch (IOException e) {
@@ -252,7 +272,7 @@ public class NeoRxClient {
 		return validateCertificates;
 	}
 
-	public void setValidateCertificates(boolean validateCertificates) {
+	public void setCertificateValidationEnabled(boolean validateCertificates) {
 		this.validateCertificates = validateCertificates;
 	}
 
@@ -272,19 +292,14 @@ public class NeoRxClient {
 		this.password = password;
 	}
 
-	/*
-	 * public boolean checkOnline() { try { Response r =
-	 * newWebTarget().path("/").request()
-	 * .accept(MediaType.APPLICATION_JSON).buildGet().invoke();
-	 * 
-	 * if (r.getStatus() == 200) { return true; } else {
-	 * logger.warn("neo4j health check returned sc={}", r.getStatus()); } }
-	 * catch (Exception e) { logger.warn("could not communicate with neo4j", e);
-	 * 
-	 * } return false; }
-	 */
-
 	public boolean checkConnection() {
-		return true;
+		try {
+			ListenableFuture<Response> x = getClient().prepareGet(getUrl()).execute();
+			Response r = x.get(10, TimeUnit.SECONDS);
+			return r.getStatusCode()==200 && r.getContentType().contains("application/json");
+		} catch (Exception e) {
+			logger.warn(e.toString());
+		}
+		return false;
 	}
 }

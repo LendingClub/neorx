@@ -35,12 +35,12 @@ public class NeoRxClientIntegrationTest extends Neo4jIntegrationTest {
 				
 			}
 		};
-		client.execCypher("match (m:Test) return m.abc").subscribe(act);
+		client.execCypher("match (m:Test) return m,m.abc").subscribe(act);
 		
 		
 		
+		client.execCypher("create (m:Test {abc:1})");
 	
-		
 	
 
 	}

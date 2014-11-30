@@ -2,21 +2,29 @@ package io.macgyver.neorx.impl;
 
 import java.util.Iterator;
 
+import org.assertj.core.util.Preconditions;
 
 import io.macgyver.neorx.ResultMetaData;
 import io.macgyver.neorx.Row;
 import rx.Observable;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class NonStreamingResultImpl  {
 
-	ObjectNode data;
+	ArrayNode data;
 	ResultMetaDataImpl metaData;
 	
 	public NonStreamingResultImpl(ObjectNode n) {
-		this.data = n;
-		metaData = new ResultMetaDataImpl(data);
+		ObjectNode r = (ObjectNode) n.path("results").get(0);
+		if (r==null) {
+			System.out.println(n);
+		}
+		data = (ArrayNode) r.get("data");
+		metaData = new ResultMetaDataImpl(r);
+		
+	
 	}
 	
 	
@@ -28,7 +36,9 @@ public class NonStreamingResultImpl  {
 			
 			@Override
 			public Iterator<Row> iterator() {
-				return new RowIterator(data);
+				
+				
+				return new RowIterator(data,metaData);
 			}
 		};
 		

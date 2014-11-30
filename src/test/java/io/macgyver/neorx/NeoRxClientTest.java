@@ -46,8 +46,8 @@ public class NeoRxClientTest {
 		String query = "match (n:MyNode) where n.val={a} return n";
 		ObjectNode n = c.formatPayload(query,c.createParameters("a",1));
 		
-		Assertions.assertThat(n.get("query").asText()).isEqualTo(query);
-		Assertions.assertThat(n.get("params").get("a").asInt()).isEqualTo(1);
+		Assertions.assertThat(n.path("statements").get(0).path("statement").asText()).isEqualTo(query);
+		Assertions.assertThat(n.path("statements").get(0).path("parameters").size()).isEqualTo(1);
 	}
 	
 	@Test
