@@ -51,14 +51,14 @@ public class RowIteratorTest {
 
 		ObjectNode r = ri.next();
 		assertThat(r.get("name").asText()).isEqualTo("Rob");
-		assertThat(r.get("name")).isEqualTo("Rob");
-		assertThat(r.get("age")).isEqualTo("39");
+		
+		assertThat(r.get("age").asText()).isEqualTo("39");
 		assertThat(r.get("age").asInt()).isEqualTo(39);
 		r = ri.next();
 
 		assertThat(r.get("name").asText()).isEqualTo("Oliver");
-		assertThat(r.get("name")).isEqualTo("Oliver");
-		assertThat(r.get("age")).isEqualTo("9");
+		assertThat(r.get("name").asText()).isEqualTo("Oliver");
+		assertThat(r.get("age").asText()).isEqualTo("9");
 		assertThat(r.get("age").asInt()).isEqualTo(9);
 
 		assertThat(ri.hasNext()).isFalse();
