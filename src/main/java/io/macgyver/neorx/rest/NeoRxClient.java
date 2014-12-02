@@ -17,7 +17,6 @@ import io.macgyver.neorx.rest.impl.NonStreamingResultImpl;
 import io.macgyver.neorx.rest.impl.SslTrust;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -30,19 +29,19 @@ import rx.Observable;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.io.BaseEncoding;
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
-import com.ning.http.client.AsyncHttpClientConfig;
-import com.ning.http.client.ListenableFuture;
-import com.ning.http.client.Response;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.squareup.okhttp.Credentials;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Request.Builder;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
 
 public class NeoRxClient {
 
@@ -55,7 +54,7 @@ public class NeoRxClient {
 	private boolean validateCertificates = false;
 	private boolean streamResponse = true;
 	final ObjectMapper mapper = new ObjectMapper();
-	private volatile AsyncHttpClient asyncClient = null;
+	private volatile OkHttpClient httpClient = null;
 
 	public NeoRxClient() {
 		this(DEFAULT_URL);
@@ -70,46 +69,28 @@ public class NeoRxClient {
 	}
 
 	public NeoRxClient(String url, String username, String password,
-			AsyncHttpClient client) {
-		Preconditions.checkNotNull(url);
-		Preconditions.checkNotNull(client);
+			boolean validateCertificates) {
+
 		this.url = url;
 		this.username = username;
 		this.password = password;
-		this.asyncClient = client;
-	}
+		this.validateCertificates = validateCertificates;
 
-	public NeoRxClient(String url, String username, String password,
-			boolean validateCertificates) {
+		OkHttpClient client = new OkHttpClient();
 
-		this(url, username, password, newClient(validateCertificates));
-
-	}
-
-	private static AsyncHttpClient newClient(boolean validateCertificates) {
-		AsyncHttpClientConfig.Builder builder = new AsyncHttpClientConfig.Builder();
 		if (!validateCertificates) {
-			builder = builder
-					.setSSLContext(SslTrust.withoutCertificateValidation())
-					.setHostnameVerifier(SslTrust.withoutHostnameVerification());
+			client.setHostnameVerifier(SslTrust.withoutHostnameVerification());
+			client.setSslSocketFactory(SslTrust.withoutCertificateValidation()
+					.getSocketFactory());
+
 		}
-		builder = builder.setConnectionTimeoutInMs(5000);
-		AsyncHttpClient asyncClient = new AsyncHttpClient(builder.build());
 		
-		return asyncClient;
+		this.httpClient = client;
 	}
 
-	public void setAsyncHttpClient(AsyncHttpClient client) {
-		Preconditions.checkNotNull(client);
-		if (asyncClient != null && !asyncClient.isClosed()) {
-			asyncClient.close();
-		}
-		asyncClient = client;
-	}
+	protected OkHttpClient getClient() {
 
-	protected AsyncHttpClient getClient() {
-
-		return asyncClient;
+		return httpClient;
 	}
 
 	public ObjectNode createParameters(Object... args) {
@@ -150,20 +131,20 @@ public class NeoRxClient {
 		return n;
 	}
 
-	public Observable<ObjectNode> execCypher(String cypher, ObjectNode params) {
-		ObjectNode response = execCypherWithJsonResponse(cypher, params);
+	public Observable<ObjectNode> exec(String cypher, ObjectNode params) {
+		ObjectNode response = execRaw(cypher, params);
 		Preconditions.checkNotNull(response);
 		return new NonStreamingResultImpl(response).rows();
 
 	}
 
-	public Observable<ObjectNode> execCypher(String cypher, Object... params) {
-		return execCypher(cypher, createParameters(params));
+	public Observable<ObjectNode> exec(String cypher, Object... params) {
+		return exec(cypher, createParameters(params));
 	}
 
-	protected ObjectNode execCypherWithJsonResponse(String cypher,
+	protected ObjectNode execRaw(String cypher,
 			Object... args) {
-		return execCypherWithJsonResponse(cypher, createParameters(args));
+		return execRaw(cypher, createParameters(args));
 	}
 
 	protected ObjectNode formatPayload(String cypher, ObjectNode params) {
@@ -184,98 +165,58 @@ public class NeoRxClient {
 		return payload;
 	}
 
-	protected ObjectNode execCypherWithJsonResponse(String cypher,
+	protected ObjectNode execRaw(String cypher,
 			ObjectNode params) {
 
 		try {
 
 			ObjectNode payload = formatPayload(cypher, params);
 
-			AsyncCompletionHandler<ObjectNode> ch = new AsyncCompletionHandler<ObjectNode>() {
 
-				@Override
-				public void onThrowable(Throwable t) {
-					logger.warn("onThrowable", t);
-				}
-
-				@Override
-				public ObjectNode onCompleted(Response response)
-						throws Exception {
-
-					if (response.getStatusCode() >= 300) {
-						if (response.getContentType().contains(
-								"application/json")) {
-							ObjectNode n = (ObjectNode) mapper
-									.readTree(response
-											.getResponseBodyAsStream());
-
-							throw new NeoRxException(n);
-						} else {
-							throw new NeoRxException("status code: "
-									+ response.getStatusCode());
-						}
-
-					}
-
-					return (ObjectNode) mapper.readTree(response
-							.getResponseBodyAsStream());
-
-				}
-
-			};
 
 			String payloadString = payload.toString();
-			AsyncHttpClient c = getClient();
+			OkHttpClient c = getClient();
 			Preconditions.checkNotNull(c);
-			BoundRequestBuilder brb = c
-					.preparePost(getUrl() + "/db/data/transaction/commit")
-					.addHeader("X-Stream", Boolean.toString(streamResponse))
-					.addHeader("Accept", "application/json");
 
-			if (!Strings.isNullOrEmpty(username)
-					&& !Strings.isNullOrEmpty(password)) {
-				brb.addHeader(
-						"Authorization",
-						"Basic "
-								+ BaseEncoding
-										.base64()
-										.encode((username + ":" + password)
-												.getBytes(Charset
-														.forName("UTF8")))
-										.toString());
+			
+			Builder builder = new Request.Builder()
+			.addHeader("X-Stream", Boolean.toString(streamResponse))
+			.addHeader("Accept", "application/json")
+			.url(getUrl() + "/db/data/transaction/commit")
+			.post(RequestBody.create(
+					MediaType.parse("application/json"), payloadString));
+			
+			if (!Strings.isNullOrEmpty(username) && !Strings.isNullOrEmpty(password)) {
+				builder = builder.addHeader("Authorization", Credentials.basic(username, password));
 			}
-
-			// There is nothing async about this processing. We just block here
-			// for now and process synchronously.
-			ListenableFuture<ObjectNode> f = brb.setBody(payloadString)
-					.execute(ch);
-			ObjectNode n = f.get();
+			
+			com.squareup.okhttp.Response r = c.newCall(builder.build()).execute();
+			
+			
+			ObjectNode jsonResponse = (ObjectNode) mapper.readTree(r.body().charStream());
+			
+			
+			ObjectNode n = jsonResponse;
 			JsonNode error = n.path("errors").path(0);
-			
-		
+
 			if (error instanceof ObjectNode) {
-		
-				throw new NeoRxException(((ObjectNode)error));
+
+				throw new NeoRxException(((ObjectNode) error));
 			}
-			
+
 			return n;
 
 		} catch (IOException e) {
 			throw new NeoRxException(e);
-		} catch (InterruptedException e) {
-			throw new NeoRxException(e);
-		} catch (ExecutionException e) {
-			throw new NeoRxException(e);
-		}
+		} 
 	}
 
 	public boolean isCertificateVerificationEnabled() {
 		return validateCertificates;
 	}
 
-	public void close() {
-		getClient().close();
-	}
+	
+
 	public void setCertificateValidationEnabled(boolean validateCertificates) {
 		this.validateCertificates = validateCertificates;
 	}
@@ -298,9 +239,14 @@ public class NeoRxClient {
 
 	public boolean checkConnection() {
 		try {
-			ListenableFuture<Response> x = getClient().prepareGet(getUrl()).execute();
-			Response r = x.get(10, TimeUnit.SECONDS);
-			return r.getStatusCode()==200 && r.getContentType().contains("application/json");
+			
+			Response r = getClient().newCall(new Request.Builder().url(getUrl()).build()).execute();
+			
+			if (r.isSuccessful()) {
+				r.body().close();
+				return true;
+			}
+		
 		} catch (Exception e) {
 			logger.warn(e.toString());
 		}

@@ -22,33 +22,44 @@ import org.slf4j.LoggerFactory;
 public class RxNeo4jIntegrationTest {
 
 	protected org.slf4j.Logger logger = LoggerFactory.getLogger(getClass());
-	static Boolean available=null;
-	private NeoRxClient client;
-	
-	
+	static Boolean available = null;
+	private static NeoRxClient client;
+
 	public String getNeo4jRestUrl() {
-		String val = System.getProperty("neo4j.url","http://localhost:7474");
+		String val = System.getProperty("neo4j.url", "http://localhost:7474");
 		return val;
 	}
-	
+
 	public synchronized NeoRxClient getClient() {
-		
-		if (client==null) {
-			client = new NeoRxClient(getNeo4jRestUrl()); 
+
+		if (client == null) {
+			client = new NeoRxClient(getNeo4jRestUrl());
 			MovieGraph g = new MovieGraph(client);
 			g.replaceMovieGraph();
 		}
 		return client;
 	}
+
 	@Before
 	public synchronized void checkIfNeo4jIsAvailable() {
-		
-		if (available==null) {
+		try {
 			
-			available = getClient().checkConnection();
+			if (available == null) {
+
+				logger.info("checkint to see if neo4j is available for tests");
+				available = getClient().checkConnection();
+
+		
+			}
+
+
+		} catch (RuntimeException e) {
+			logger.warn("neo4j not available",e);
 		}
-		if (!available) {
+		
+		if (available==null || !available) {
 			logger.warn("neo4j is not available -- integration tests will not be run");
+			available=false;
 		}
 		Assume.assumeTrue(available);
 	}

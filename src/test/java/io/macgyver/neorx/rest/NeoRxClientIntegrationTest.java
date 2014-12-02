@@ -21,35 +21,18 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class NeoRxClientIntegrationTest extends RxNeo4jIntegrationTest {
 
-	
-
 	Logger logger = LoggerFactory.getLogger(NeoRxClientIntegrationTest.class);
+
 	@Test
 	public void testX() {
-		
-		
+
 		NeoRxClient c = getClient();
-		
-		for (ObjectNode r: c.execCypher("match (m:Person) where m.born>{born} return m.born, m","born",1960).toBlocking().toIterable()) {
-			System.out.println(r);
+
+		for (ObjectNode r : c
+				.exec("match (m:Person) where m.born>{born} return m.born, m",
+						"born", 1960).toBlocking().toIterable()) {
+			logger.info("item: {}", r.path("m"));
 		}
-		
-		
-		
-		
-		/*
-		
-		List<ObjectNode> list = Lists.newArrayList(c.execCypher("match m return m").flatMap(Transforms.extractObjectNode("m")).distinct().toBlocking().toIterable());
-		
-		
-		System.out.println(list);
-		
-		*/
-		
-		
-		
-	
-	
 
 	}
 }

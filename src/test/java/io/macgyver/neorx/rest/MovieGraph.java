@@ -22,38 +22,34 @@ public class MovieGraph {
 
 	NeoRxClient client;
 
-
-
 	public static void main(String[] args) throws IOException {
 
 		NeoRxClient c = new NeoRxClient();
 
 		MovieGraph mg = new MovieGraph(c);
-	
+
 		mg.replaceMovieGraph();
 
-		c.close();
 	}
 
 	public MovieGraph(NeoRxClient c) {
 		com.google.common.base.Preconditions.checkNotNull(c);
 		this.client = c;
 	}
-	
-	public void replaceMovieGraph()  {
+
+	public void replaceMovieGraph() {
 
 		try {
-		client.execCypher("MATCH (n:Person)-[r]-() delete r");
+			client.exec("MATCH (n:Person)-[r]-() delete r");
 
-		client.execCypher("MATCH (n:Movie)-[r]-() delete r");
+			client.exec("MATCH (n:Movie)-[r]-() delete r");
 
-		client.execCypher("MATCH (p:Person) delete p");
+			client.exec("MATCH (p:Person) delete p");
 
-		client.execCypher("MATCH (m:Movie) delete m");
+			client.exec("MATCH (m:Movie) delete m");
 
-		executeClasspath("movies.cypher");
-		}
-		catch (IOException e) {
+			executeClasspath("movies.cypher");
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -63,10 +59,8 @@ public class MovieGraph {
 		URL url = Resources.getResource(name);
 		String val = Resources.toString(url, Charsets.UTF_8);
 
-		client.execCypher(val);
+		client.exec(val);
 
 	}
-
-
 
 }

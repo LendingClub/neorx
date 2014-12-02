@@ -2,8 +2,8 @@ package io.macgyver.neorx.rest.impl;
 
 import java.util.Iterator;
 
+import io.macgyver.neorx.rest.NeoRxException;
 import io.macgyver.neorx.rest.ResultMetaData;
-
 import rx.Observable;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -16,9 +16,7 @@ public class NonStreamingResultImpl  {
 	
 	public NonStreamingResultImpl(ObjectNode n) {
 		ObjectNode r = (ObjectNode) n.path("results").get(0);
-		if (r==null) {
-			System.out.println(n);
-		}
+		
 		data = (ArrayNode) r.get("data");
 		metaData = new ResultMetaDataImpl(r);
 		
