@@ -63,7 +63,9 @@ public class NeoRxClient {
 	public NeoRxClient(String url) {
 		this(url, null, null, false);
 	}
-
+	public NeoRxClient(String url, boolean validateCertificates) {
+		this(url, null, null, validateCertificates);
+	}
 	public NeoRxClient(String url, String username, String password) {
 		this(url, username, password, false);
 	}
