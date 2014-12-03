@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.observables.BlockingObservable;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.IntNode;
@@ -40,7 +41,35 @@ public class NeoRxClientIntegrationTest extends RxNeoIntegrationTest {
 	Logger logger = LoggerFactory.getLogger(NeoRxClientIntegrationTest.class);
 
 
+	@Test
+	public void testEmptyResult() {
+		// since we only return a single entity, we "unwrap" the value to make
+		// it easier to process
 
+		List<JsonNode> r = getClient().execCypher("match (m:Person) where m.name='not found' return m"
+				).toList().toBlocking().first();
+		
+		Assert.assertNotNull(r);
+		Assertions.assertThat(r).isEmpty();
+		
+		r = getClient().execCypher("match (m:Person) where m.name={name} return m.name,m.born","name","invalid"
+				).toList().toBlocking().first();
+		
+		Assert.assertNotNull(r);
+		Assertions.assertThat(r).isEmpty();
+		
+		BlockingObservable<JsonNode>bo = getClient().execCypher("match (m:Person) where m.name={name} return m.name,m.born","name","invalid"
+				).toBlocking();
+		Assert.assertFalse(bo.getIterator().hasNext());
+		
+		Assert.assertTrue(getClient().execCypher("match (m:Person) where m.name={name} return m.name,m.born","name","invalid"
+				).count().toBlocking().first()==0);
+		
+		
+		Assert.assertNull(getClient().execCypher("match (m:Person) where m.name='not found' return m"
+				).toBlocking().firstOrDefault(null));
+	
+	}
 	@Test
 	public void testUnwrapped() {
 		// since we only return a single entity, we "unwrap" the value to make
