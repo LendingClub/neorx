@@ -2,8 +2,11 @@
 
 [![Build Status](http://ci.macgyver.io/buildStatus/icon?job=neorx-ci)](http://ci.macgyver.io/job/neorx-ci/)
 
-Neo4j REST Client implemented using RxJava.  NeoRx uses RxJava less for its reactiveness, and more for the
-fluent API it provides for transforming results.
+Neo4j REST Client implemented using RxJava, Jackson, and OkHttp.
+
+RxJava provides a powerful fluent API for processing result data.
+Jackson provides a fluent API for processing JSON data.
+OkHttp provides a simple HTTP transport layer.
 
 
 ## Recipes
