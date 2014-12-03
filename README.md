@@ -12,10 +12,10 @@ Instantiate the (thread-safe) client:
 	// to http://localhost:7474
 	NeoRxClient c0 = new NeoRxClient(); 
 	
-	// to http://neo4j.example.com:7473
+	// to https://neo4j.example.com:7473
 	NeoRxClient c1 = new NeoRxClient("https://neo4j.example.com:7473");
 
-	// to http://neo4j.example.com:7473 with certificate validation disabled
+	// to https://neo4j.example.com:7473 with certificate validation disabled
 	NeoRxClient c2 = new NeoRxClient("https://neo4j.example.com:7473",false);
 
 	// with basic auth
