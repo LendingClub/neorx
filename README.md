@@ -25,5 +25,5 @@ return their names as a List&lt;String&gt;:
 		  "born", 1960)
 		  .flatMap(NeoRxFunctions.jsonNodeToString())
 		  .toList()
-		.toBlocking().first();
+		  .toBlocking().first();
 ```
