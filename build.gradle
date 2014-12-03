@@ -2,6 +2,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
 apply plugin:'application'
+apply plugin: "jacoco"
 
 group 'io.macgyver.neorx'
 version = "0.5.0"
@@ -14,7 +15,7 @@ configurations {
 
 repositories {
    mavenLocal()
-    mavenCentral()
+   mavenCentral()
 	jcenter()
    
 
@@ -85,4 +86,19 @@ uploadArchives {
             }
         }
     }
+}
+
+
+
+jacocoTestReport {
+    group = "reporting"
+    description = "Generate Jacoco coverage reports after running tests."
+    reports {
+        xml.enabled true
+        html.enabled true
+        csv.enabled false
+    }
+    //classDirectories = fileTree(dir: 'build/classes/main', include: 'com/thc/**')
+    //sourceDirectories = fileTree(dir: 'scr/java', include: 'com/thc/**')
+    additionalSourceDirs = files(sourceSets.main.allJava.srcDirs)
 }

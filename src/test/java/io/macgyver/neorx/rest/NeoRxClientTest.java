@@ -13,9 +13,11 @@
  */
 package io.macgyver.neorx.rest;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import io.macgyver.neorx.rest.NeoRxClient;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -24,7 +26,15 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class NeoRxClientTest {
 
 	
+	@Test
+	public void testListParam() {
+		NeoRxClient c = new NeoRxClient();
 
+		ObjectNode n = c.createParameters("abc", Lists.newArrayList("x"));
+
+		assertThat(n.get("abc").get(0).asText()).isEqualTo("x");
+		assertThat(n.get("abc").isArray()).isTrue();
+	}
 	@Test
 	public void testIntParam() {
 		NeoRxClient c = new NeoRxClient();

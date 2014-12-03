@@ -6,6 +6,7 @@ import io.macgyver.neorx.rest.NeoRxException;
 import io.macgyver.neorx.rest.ResultMetaData;
 import rx.Observable;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -27,11 +28,11 @@ public class NonStreamingResultImpl  {
 	public ResultMetaData getResultMetaData() {
 		return metaData;
 	}
-	public Iterable<ObjectNode> iterableRows() {
-		return new Iterable<ObjectNode>() {
+	public Iterable<JsonNode> iterableRows() {
+		return new Iterable<JsonNode>() {
 			
 			@Override
-			public Iterator<ObjectNode> iterator() {
+			public Iterator<JsonNode> iterator() {
 				
 				
 				return new RowIterator(data,metaData);
@@ -42,7 +43,7 @@ public class NonStreamingResultImpl  {
 	public int size() {
 		return data.path("data").size();
 	}
-	public Observable<ObjectNode> rows() {
+	public Observable<JsonNode> rows() {
 		return Observable.from(iterableRows());
 	}
 }

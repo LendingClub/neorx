@@ -13,15 +13,14 @@
  */
 package io.macgyver.neorx.rest;
 
-import io.macgyver.neorx.rest.NeoRxClient;
-
 import org.junit.Assume;
 import org.junit.Before;
 import org.slf4j.LoggerFactory;
 
-public class RxNeo4jIntegrationTest {
+public abstract class RxNeoIntegrationTest {
 
-	protected org.slf4j.Logger logger = LoggerFactory.getLogger(getClass());
+	org.slf4j.Logger logger = LoggerFactory
+			.getLogger(RxNeoIntegrationTest.class);
 	static Boolean available = null;
 	private static NeoRxClient client;
 
@@ -43,23 +42,21 @@ public class RxNeo4jIntegrationTest {
 	@Before
 	public synchronized void checkIfNeo4jIsAvailable() {
 		try {
-			
+
 			if (available == null) {
 
-				logger.info("checkint to see if neo4j is available for tests");
+				logger.info("checking to see if neo4j is available for tests");
 				available = getClient().checkConnection();
 
-		
 			}
 
-
 		} catch (RuntimeException e) {
-			logger.warn("neo4j not available",e);
+			logger.warn("neo4j not available", e);
 		}
-		
-		if (available==null || !available) {
+
+		if (available == null || !available) {
 			logger.warn("neo4j is not available -- integration tests will not be run");
-			available=false;
+			available = false;
 		}
 		Assume.assumeTrue(available);
 	}

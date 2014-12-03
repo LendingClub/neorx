@@ -1,5 +1,6 @@
 package io.macgyver.neorx.rest.impl;
 
+import io.macgyver.neorx.rest.NeoRxException;
 import io.macgyver.neorx.rest.impl.ResultMetaDataImpl;
 
 import org.assertj.core.api.Assertions;
@@ -33,6 +34,19 @@ public class ResultMetaDataImplTest {
 		Assertions.assertThat(rmd.getField("v.col1")).isEqualTo(2);
 		
 		
+		
+	}
+	
+	@Test 
+	public void testNull() {
+		
+		try {
+		ResultMetaDataImpl m = new ResultMetaDataImpl(mapper.createObjectNode().set("columns", mapper.createArrayNode()));
+		m.getField("test");
+		}
+		catch (NeoRxException e) {
+			Assertions.assertThat(e).hasMessageContaining("no such field: test");
+		}
 		
 	}
 }

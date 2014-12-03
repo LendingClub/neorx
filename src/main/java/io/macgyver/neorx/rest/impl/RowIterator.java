@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Preconditions;
 
-public class RowIterator implements Iterator<ObjectNode> {
+public class RowIterator implements Iterator<JsonNode> {
 
 	static ObjectMapper mapper = new ObjectMapper();
 	Iterator<JsonNode> iterator;

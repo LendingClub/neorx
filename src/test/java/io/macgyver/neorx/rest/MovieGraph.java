@@ -40,13 +40,13 @@ public class MovieGraph {
 	public void replaceMovieGraph() {
 
 		try {
-			client.exec("MATCH (n:Person)-[r]-() delete r");
+			client.execCypher("MATCH (n:Person)-[r]-() delete r");
 
-			client.exec("MATCH (n:Movie)-[r]-() delete r");
+			client.execCypher("MATCH (n:Movie)-[r]-() delete r");
 
-			client.exec("MATCH (p:Person) delete p");
+			client.execCypher("MATCH (p:Person) delete p");
 
-			client.exec("MATCH (m:Movie) delete m");
+			client.execCypher("MATCH (m:Movie) delete m");
 
 			executeClasspath("movies.cypher");
 		} catch (IOException e) {
@@ -59,7 +59,7 @@ public class MovieGraph {
 		URL url = Resources.getResource(name);
 		String val = Resources.toString(url, Charsets.UTF_8);
 
-		client.exec(val);
+		client.execCypher(val);
 
 	}
 

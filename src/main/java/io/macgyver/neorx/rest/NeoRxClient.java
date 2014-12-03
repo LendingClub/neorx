@@ -53,7 +53,7 @@ public class NeoRxClient {
 	private String password = null;
 	private boolean validateCertificates = false;
 	private boolean streamResponse = true;
-	final ObjectMapper mapper = new ObjectMapper();
+	final static ObjectMapper mapper = new ObjectMapper();
 	private volatile OkHttpClient httpClient = null;
 
 	public NeoRxClient() {
@@ -84,7 +84,7 @@ public class NeoRxClient {
 					.getSocketFactory());
 
 		}
-		
+
 		this.httpClient = client;
 	}
 
@@ -131,19 +131,27 @@ public class NeoRxClient {
 		return n;
 	}
 
-	public Observable<ObjectNode> exec(String cypher, ObjectNode params) {
+	public Observable<JsonNode> execCypher(String cypher, ObjectNode params) {
 		ObjectNode response = execRaw(cypher, params);
 		Preconditions.checkNotNull(response);
-		return new NonStreamingResultImpl(response).rows();
+		NonStreamingResultImpl r = new NonStreamingResultImpl(response);
+		ResultMetaData md = r.getResultMetaData();
+		if (md.getFieldNames().size() == 1) {
+
+			return r.rows().flatMap(
+					
+					NeoRxFunctions.extractField(md.getFieldNames().get(0)));
+		} else {
+			return r.rows();
+		}
 
 	}
 
-	public Observable<ObjectNode> exec(String cypher, Object... params) {
-		return exec(cypher, createParameters(params));
+	public Observable<JsonNode> execCypher(String cypher, Object... params) {
+		return execCypher(cypher, createParameters(params));
 	}
 
-	protected ObjectNode execRaw(String cypher,
-			Object... args) {
+	protected ObjectNode execRaw(String cypher, Object... args) {
 		return execRaw(cypher, createParameters(args));
 	}
 
@@ -165,37 +173,35 @@ public class NeoRxClient {
 		return payload;
 	}
 
-	protected ObjectNode execRaw(String cypher,
-			ObjectNode params) {
+	protected ObjectNode execRaw(String cypher, ObjectNode params) {
 
 		try {
 
 			ObjectNode payload = formatPayload(cypher, params);
 
-
-
 			String payloadString = payload.toString();
 			OkHttpClient c = getClient();
 			Preconditions.checkNotNull(c);
 
-			
 			Builder builder = new Request.Builder()
-			.addHeader("X-Stream", Boolean.toString(streamResponse))
-			.addHeader("Accept", "application/json")
-			.url(getUrl() + "/db/data/transaction/commit")
-			.post(RequestBody.create(
-					MediaType.parse("application/json"), payloadString));
-			
-			if (!Strings.isNullOrEmpty(username) && !Strings.isNullOrEmpty(password)) {
-				builder = builder.addHeader("Authorization", Credentials.basic(username, password));
+					.addHeader("X-Stream", Boolean.toString(streamResponse))
+					.addHeader("Accept", "application/json")
+					.url(getUrl() + "/db/data/transaction/commit")
+					.post(RequestBody.create(
+							MediaType.parse("application/json"), payloadString));
+
+			if (!Strings.isNullOrEmpty(username)
+					&& !Strings.isNullOrEmpty(password)) {
+				builder = builder.addHeader("Authorization",
+						Credentials.basic(username, password));
 			}
-			
-			com.squareup.okhttp.Response r = c.newCall(builder.build()).execute();
-			
-			
-			ObjectNode jsonResponse = (ObjectNode) mapper.readTree(r.body().charStream());
-			
-			
+
+			com.squareup.okhttp.Response r = c.newCall(builder.build())
+					.execute();
+
+			ObjectNode jsonResponse = (ObjectNode) mapper.readTree(r.body()
+					.charStream());
+
 			ObjectNode n = jsonResponse;
 			JsonNode error = n.path("errors").path(0);
 
@@ -208,14 +214,12 @@ public class NeoRxClient {
 
 		} catch (IOException e) {
 			throw new NeoRxException(e);
-		} 
+		}
 	}
 
 	public boolean isCertificateVerificationEnabled() {
 		return validateCertificates;
 	}
-
-	
 
 	public void setCertificateValidationEnabled(boolean validateCertificates) {
 		this.validateCertificates = validateCertificates;
@@ -239,14 +243,15 @@ public class NeoRxClient {
 
 	public boolean checkConnection() {
 		try {
-			
-			Response r = getClient().newCall(new Request.Builder().url(getUrl()).build()).execute();
-			
+
+			Response r = getClient().newCall(
+					new Request.Builder().url(getUrl()).build()).execute();
+
 			if (r.isSuccessful()) {
 				r.body().close();
 				return true;
 			}
-		
+
 		} catch (Exception e) {
 			logger.warn(e.toString());
 		}
