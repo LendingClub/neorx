@@ -18,6 +18,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.UnknownHostException;
+import java.util.List;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -32,6 +33,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.NumericNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Lists;
 
 public class NeoRxClientIntegrationTest extends RxNeoIntegrationTest {
 
@@ -54,7 +56,19 @@ public class NeoRxClientIntegrationTest extends RxNeoIntegrationTest {
 			}
 		});
 	}
+	@Test
+	public void testUnwrappedBlockingTransform() {
+		
+		// find all the people in the graph born after 1960 and return a list of their names
 
+		List<String> n = getClient().execCypher("match (m:Person) where m.born>{born} return m.name",
+				"born", 1960).flatMap(NeoRxFunctions.jsonNodeToString()).toList().toBlocking().first();
+		
+		assertThat(n).contains("Meg Ryan");
+	
+		
+		
+	}
 	@Test
 	public void testUnwrappedNull() {
 		// since we only return a single entity, we "unwrap" the value to make
@@ -73,6 +87,8 @@ public class NeoRxClientIntegrationTest extends RxNeoIntegrationTest {
 		});
 	}
 
+	
+	
 	@Test
 	public void testCreateParameters() {
 		ObjectNode n = getClient().createParameters("abc",null);
