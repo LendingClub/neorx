@@ -4,9 +4,11 @@
 
 Neo4j REST Client implemented using RxJava, Jackson, and OkHttp.
 
-RxJava provides a powerful fluent API for processing result data.
-Jackson provides a fluent API for processing JSON data.
-OkHttp provides a simple HTTP transport layer.
+[RxJava](https://github.com/ReactiveX/RxJava) provides a powerful fluent API for processing result data
+
+[Jackson](https://github.com/FasterXML/jackson) provides a fluent API for processing JSON data
+
+[OkHttp](http://square.github.io/okhttp/) provides a fluent HTTP client
 
 
 ## Recipes
