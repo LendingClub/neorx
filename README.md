@@ -50,3 +50,13 @@ return their names as a List&lt;String&gt;:
 		  .toList()
 		  .toBlocking().first();
 ```
+The same query, but instead of collecting the values into a List, we execute an anonymous class.  
+```java
+	neoRxClient.execCypher("match (m:Person) where m.born>{born} return m",
+		"born", 1960).subscribe(new Action1<JsonNode>() {
+
+			@Override
+			public void call(JsonNode t1) {
+				System.out.println("Name: "+t1.path("name").asText();
+			}
+		});
