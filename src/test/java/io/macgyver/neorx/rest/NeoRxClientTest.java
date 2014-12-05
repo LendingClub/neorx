@@ -21,6 +21,7 @@ import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class NeoRxClientTest {
@@ -39,15 +40,16 @@ public class NeoRxClientTest {
 	public void testIntParam() {
 		NeoRxClient c = new NeoRxClient();
 
-		ObjectNode n = c.createParameters("abc", 1);
-
+	
+		Assert.assertEquals(JsonNodeType.NUMBER, c.createParameters("abc", Integer.MAX_VALUE).get("abc").getNodeType());
 	}
 	@Test
 	public void testLongParam() {
 		NeoRxClient c = new NeoRxClient();
 
-		ObjectNode n = c.createParameters("abc", 1L);
-
+	
+		Assert.assertEquals(JsonNodeType.NUMBER, c.createParameters("abc", Long.MAX_VALUE).get("abc").getNodeType());
+		
 	}
 	
 	@Test

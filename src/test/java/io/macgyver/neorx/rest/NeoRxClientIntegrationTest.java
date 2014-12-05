@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.observables.BlockingObservable;
@@ -92,10 +93,10 @@ public class NeoRxClientIntegrationTest extends RxNeoIntegrationTest {
 
 		List<String> n = getClient().execCypher("match (m:Person) where m.born>{born} return m.name",
 				"born", 1960).flatMap(NeoRxFunctions.jsonNodeToString()).toList().toBlocking().first();
-		
+	
 		assertThat(n).contains("Meg Ryan");
 	
-		
+	
 		
 	}
 	@Test
@@ -168,5 +169,23 @@ public class NeoRxClientIntegrationTest extends RxNeoIntegrationTest {
 			Assertions.assertThat(e).isInstanceOf(NeoRxException.class);
 
 		}
+	}
+	
+	@Test
+	public void testX() {
+		List<JsonNode> n = getClient().execCypherAsList("match (m:Person) where m.name={name} return m",
+				"name", "Carrie-Anne Moss");
+	
+		Assertions.assertThat(n.get(0).path("born").asInt()).isEqualTo(1967);
+	
+		
+		 n = getClient().execCypherAsList("match (m:Person) where m.name={name} return m.born",
+				"name", "Carrie-Anne Moss");
+		Assertions.assertThat(n.get(0).asInt()).isEqualTo(1967);
+		
+		n = getClient().execCypherAsList("match (m:Person) where m.name={name} return m.name,m.born",
+				"name", "Carrie-Anne Moss");
+		Assertions.assertThat(n.get(0).path("m.born").asInt()).isEqualTo(1967);
+		Assertions.assertThat(n.get(0).path("m.name").asText()).isEqualTo("Carrie-Anne Moss");
 	}
 }
