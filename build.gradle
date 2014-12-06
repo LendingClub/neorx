@@ -5,9 +5,9 @@ apply plugin:'application'
 apply plugin: "jacoco"
 
 group 'io.macgyver.neorx'
-version = "1.0.2"
+version = "1.0.3"
 configurations {
-	all*.exclude group: 'org.codehaus.groovy', module: 'groovy'
+	//all*.exclude group: 'org.codehaus.groovy', module: 'groovy'
 	all*.exclude group: 'log4j'
 	all*.exclude group: 'xml-apis'
     all*.exclude group: 'commons-logging'
@@ -73,13 +73,28 @@ uploadArchives {
                 authentication(userName: bintrayUser, password: bintrayKey)
 			}
             pom.project {
+				
+				name 'NeoRx'
+				description 'REST Client for Neo4j'
+				url 'https://github.com/if6was9/NeoRx'
                 licenses {
                     license {
                         name 'The Apache Software License, Version 2.0'
                         url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+						distribution 'repo'
                     }
                 }
-            
+				scm {
+					connection 'scm:git:git@github.com:if6was9/neorx.git'
+					developerConnection 'scm:git:git@github.com:if6was9/neorx.git'
+					url 'git@github.com:if6was9/neorx.git'
+				}
+            	developers {
+					developer {
+						name 'Rob Schoening'
+						email 'robschoening@gmail.com'
+					}
+				}
             }
         }
     }
@@ -99,3 +114,4 @@ jacocoTestReport {
     //sourceDirectories = fileTree(dir: 'scr/java', include: 'com/thc/**')
     additionalSourceDirs = files(sourceSets.main.allJava.srcDirs)
 }
+
