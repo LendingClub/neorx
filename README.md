@@ -3,13 +3,17 @@
 
 [![Build Status](http://ci.macgyver.io/buildStatus/icon?job=neorx-ci)](http://ci.macgyver.io/job/neorx-ci/)
 
-Neo4j REST Client implemented using RxJava, Jackson, and OkHttp.
+Neo4j REST Client implemented using:
 
 [RxJava](https://github.com/ReactiveX/RxJava) provides a powerful fluent API for processing result data
 
 [Jackson](https://github.com/FasterXML/jackson) provides a fluent API for processing JSON data
 
 [OkHttp](http://square.github.io/okhttp/) provides a fluent HTTP client
+
+The Neo4J Cypher REST API combines the power of the Cypher query language with a JSON-native API that is very easy to process. 
+
+The examples below should make this very clear.
 
 ## Obtaining
 
