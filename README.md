@@ -59,17 +59,15 @@ return their nodes (with properties) as a List&lt;JsonNode&gt;:
 		  .toBlocking().first();
 ```
 
-Find all of the people in the graph who were born after 1960 and
-return their names as a List&lt;String&gt;:
-```java
-		List<String> names = neoRxClient
-		  .execCypher("match (m:Person) where m.born>{born} return m.name", 
-		  "born", 1960)
-		  .flatMap(NeoRxFunctions.jsonNodeToString())
-		  .toList()
-		  .toBlocking().first();
+Or if you want to skip the RxJava APIs and get a List directly:
+
+```java 
+		List<JsonNode> people = neoRxClient
+		  .execCypherAsList("match (m:Person) where m.born>{born} return m", 
+		  "born", 1960);
 ```
-The same query, but instead of collecting the values into a List, we execute an anonymous class.  
+
+Of course, it is possible to use RxJava Subscriber and Action instances:  
 ```java
 	neoRxClient.execCypher("match (m:Person) where m.born>{born} return m",
 		"born", 1960).subscribe(new Action1<JsonNode>() {
@@ -79,3 +77,15 @@ The same query, but instead of collecting the values into a List, we execute an 
 				System.out.println("Name: "+t1.path("name").asText();
 			}
 		});
+```
+
+This example transforms the output to a List<String>:
+
+```java
+		List<String> names = neoRxClient
+		  .execCypher("match (m:Person) where m.born>{born} return m.name", 
+		  "born", 1960)
+		  .flatMap(NeoRxFunctions.jsonNodeToString())
+		  .toList()
+		  .toBlocking().first();
+```
