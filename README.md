@@ -7,7 +7,7 @@ Neo4j REST Client implemented using:
 
 [RxJava](https://github.com/ReactiveX/RxJava) - a powerful fluent API for processing results in a functional/reactive pattern
 
-[Jackson](https://github.com/FasterXML/jackson) - a fluent API for processing JSON data
+[Jackson](https://github.com/FasterXML/jackson) - the most fluent Java API for processing JSON 
 
 [OkHttp](http://square.github.io/okhttp/) - a fluent HTTP client
 
