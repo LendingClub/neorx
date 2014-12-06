@@ -35,42 +35,59 @@ compile "io.macgyver.neorx:neorx:1.0.4"
 Instantiate the (thread-safe) client:
 ```java
 	// to http://localhost:7474
-	NeoRxClient neoRxClient = new NeoRxClient(); 
+	NeoRxClient client = new NeoRxClient(); 
 	
 	// to https://neo4j.example.com:7473
-	NeoRxClient neoRxClient1 = new NeoRxClient("https://neo4j.example.com:7473");
+	client = new NeoRxClient("https://neo4j.example.com:7473");
 
 	// to https://neo4j.example.com:7473 with certificate validation disabled
-	NeoRxClient neoRxClient2 = new NeoRxClient("https://neo4j.example.com:7473",false);
+	client = new NeoRxClient("https://neo4j.example.com:7473",false);
 
 	// with basic auth
-	NeoRxClient neoRxClient3 = new NeoRxClient("http://localhost:7474","myusername","mypassword");
+	client = new NeoRxClient("http://localhost:7474","myusername","mypassword");
 	
 ```
 
-
-Find all of the people in the graph who were born after 1960 and
-return their nodes (with properties) as a List&lt;JsonNode&gt;:
+Find all of the people in the graph who are born after 1980 and print the results using a Java 8 Lambda:
 ```java
-		List<JsonNode> people = neoRxClient
-		  .execCypher("match (m:Person) where m.born>{born} return m", 
-		  "born", 1960)
-		  .toList()
-		  .toBlocking().first();
+	client.execCypher("match (p:Person) where p.born>1980 return p").subscribe(it -> System.out.println(it));
+
+Output:
+
+{"name":"Jonathan Lipnicki","born":1990}
+{"name":"Natalie Portman","born":1981}
+{"name":"Emile Hirsch","born":1985}
+{"name":"Rain","born":1982}
 ```
 
-Or if you want to skip the RxJava APIs and get a List directly:
+Same query, but print just the name:
+```java
+	client.execCypher("match (p:Person) where p.born>1960 return p").subscribe(it -> System.out.println(it.path("name").asText());
+	
+Output:
 
-```java 
-		List<JsonNode> people = neoRxClient
-		  .execCypherAsList("match (m:Person) where m.born>{born} return m", 
-		  "born", 1960);
+Jonathan Lipnicki
+Natalie Portman
+Emile Hirsch
+Rain
 ```
 
-Of course, it is possible to use RxJava Subscriber and Action instances:  
+And now return the attributes individually:
 ```java
-	neoRxClient.execCypher("match (m:Person) where m.born>{born} return m",
-		"born", 1960).subscribe(new Action1<JsonNode>() {
+	client.execCypher("match (p:Person) where p.born>1980 return p.name, p.born").subscribe(it -> System.out.println(it.path("p.name").asText()+" - "+it.path("p.born").asInt()));
+	
+Output:
+
+Jonathan Lipnicki - 1990
+Natalie Portman - 1981
+Emile Hirsch - 1985
+Rain - 1982
+```
+If you are stuck with Java 7:
+
+```java
+	neoRxClient.execCypher("match (p:Person) where p.born>1980 return p").subscribe(
+		new Action1<JsonNode>() {
 
 			@Override
 			public void call(JsonNode t1) {
@@ -79,12 +96,24 @@ Of course, it is possible to use RxJava Subscriber and Action instances:
 		});
 ```
 
-This example transforms the output to a List<String>:
+
+If you just want a list:
+```
+  List<JsonNode> people = client
+		  .execCypher("match (p:Person) where p.born>1980 return p").toList().toBlocking().first();
+```
+
+And the same operation, through a convenience method:
+```
+  List<JsonNode> people = client
+		  .execCypherAsList("match (p:Person) where p.born>1980 return p");
+```		  
+
+This example shows the use of an Rx function to transform the result from JsonNode to String:
 
 ```java
 		List<String> names = neoRxClient
-		  .execCypher("match (m:Person) where m.born>{born} return m.name", 
-		  "born", 1960)
+		  .execCypher("match (p:Person) where p.born>1980 return p.name")
 		  .flatMap(NeoRxFunctions.jsonNodeToString())
 		  .toList()
 		  .toBlocking().first();
