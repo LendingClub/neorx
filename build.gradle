@@ -1,11 +1,12 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
-apply plugin:'application'
+apply plugin: 'application'
 apply plugin: "jacoco"
+apply plugin: "signing"
 
 group 'io.macgyver.neorx'
-version = "1.0.3"
+version = "1.0.4"
 configurations {
 	//all*.exclude group: 'org.codehaus.groovy', module: 'groovy'
 	all*.exclude group: 'log4j'
@@ -62,6 +63,7 @@ artifacts {
 uploadArchives {
     repositories {
         mavenDeployer {
+			
             name = 'macgyver-bintray'
             if (!project.hasProperty('bintrayUser')) {
                 project.ext['bintrayUser']=""
@@ -69,6 +71,9 @@ uploadArchives {
             if (!project.hasProperty('bintrayKey')) {
                 project.ext['bintrayKey']=""
             }
+			
+			beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+			
             repository(id: 'macgyver-bintray', url: 'https://api.bintray.com/maven/robschoening/io-macgyver/neorx'){
                 authentication(userName: bintrayUser, password: bintrayKey)
 			}
@@ -100,7 +105,9 @@ uploadArchives {
     }
 }
 
-
+signing {
+	sign configurations.archives
+}
 
 jacocoTestReport {
     group = "reporting"
