@@ -50,7 +50,8 @@ Instantiate the (thread-safe) client:
 
 Find all of the people in the graph who are born after 1980 and print the results using a Java 8 Lambda:
 ```java
-	client.execCypher("match (p:Person) where p.born>1980 return p").subscribe(it -> System.out.println(it));
+client.execCypher("match (p:Person) where p.born>1980 return p")
+	.subscribe(it -> System.out.println(it));
 
 Output:
 
@@ -62,7 +63,10 @@ Output:
 
 Same query, but print just the name:
 ```java
-	client.execCypher("match (p:Person) where p.born>1960 return p").subscribe(it -> System.out.println(it.path("name").asText());
+	client.execCypher("match (p:Person) where p.born>1960 return p")
+	  .subscribe(
+	  	it -> System.out.println(it.path("name").asText()
+	  	);
 	
 Output:
 
@@ -74,7 +78,10 @@ Rain
 
 And now return the attributes individually:
 ```java
-	client.execCypher("match (p:Person) where p.born>1980 return p.name, p.born").subscribe(it -> System.out.println(it.path("p.name").asText()+" - "+it.path("p.born").asInt()));
+client.execCypher("match (p:Person) where p.born>1980 return p.name, p.born")
+	.subscribe(
+		it -> System.out.println(it.path("p.name").asText()+" - "+it.path("p.born").asInt())
+	);
 	
 Output:
 
@@ -86,41 +93,44 @@ Rain - 1982
 If you are stuck with Java 7:
 
 ```java
-	neoRxClient.execCypher("match (p:Person) where p.born>1980 return p").subscribe(
-		new Action1<JsonNode>() {
+neoRxClient.execCypher("match (p:Person) where p.born>1980 return p")
+.subscribe(
+	new Action1<JsonNode>() {
 
-			@Override
-			public void call(JsonNode t1) {
-				System.out.println("Name: "+t1.path("name").asText();
-			}
-		});
+		@Override
+		public void call(JsonNode t1) {
+			System.out.println("Name: "+t1.path("name").asText();
+		}
+	});
 ```
 
 
 If you just want a list:
 ```
-  List<JsonNode> people = client
-		  .execCypher("match (p:Person) where p.born>1980 return p").toList().toBlocking().first();
+List<JsonNode> people = client.execCypher("match (p:Person) where p.born>1980 return p")
+	.toList()
+	.toBlocking()
+	.first();
 ```
 
 And the same operation, through a convenience method:
 ```
-  List<JsonNode> people = client
-		  .execCypherAsList("match (p:Person) where p.born>1980 return p");
+List<JsonNode> people = client
+	.execCypherAsList("match (p:Person) where p.born>1980 return p");
 ```		  
 
 This example shows the use of an Rx function to transform the result from JsonNode to String:
 
 ```java
-		List<String> names = neoRxClient
-		  .execCypher("match (p:Person) where p.born>1980 return p.name")
-		  .flatMap(NeoRxFunctions.jsonNodeToString())
-		  .toList()
-		  .toBlocking().first();
+List<String> names = neoRxClient
+	.execCypher("match (p:Person) where p.born>1980 return p.name")
+	.flatMap(NeoRxFunctions.jsonNodeToString())
+	.toList()
+	.toBlocking().first();
 ```
 
 Now, let's parameterize the cypher quey:
 ```
   List<JsonNode> people = client
-		  .execCypherAsList("match (p:Person) where p.born>{year} return p","year",1980);
+  .execCypherAsList("match (p:Person) where p.born>{year} return p","year",1980);
 ```
