@@ -11,6 +11,24 @@ Neo4j REST Client implemented using RxJava, Jackson, and OkHttp.
 
 [OkHttp](http://square.github.io/okhttp/) provides a fluent HTTP client
 
+## Obtaining
+
+NeoRx is available from maven central:
+
+```xml
+<dependency>
+  <groupId>io.macgyver.neorx</groupId>
+  <artifactId>neorx</artifactId>
+  <version>1.0.4</version>
+</dependency>
+```
+
+or if you are lucky enough to be using Gradle:
+
+```groovy
+compile "io.macgyver.neorx:neorx:1.0.4"
+```
+
 
 ## Recipes
 
