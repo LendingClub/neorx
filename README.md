@@ -5,11 +5,11 @@
 
 Neo4j REST Client implemented using:
 
-[RxJava](https://github.com/ReactiveX/RxJava) provides a powerful fluent API for processing result data
+[RxJava](https://github.com/ReactiveX/RxJava) - a powerful fluent API for processing result data
 
-[Jackson](https://github.com/FasterXML/jackson) provides a fluent API for processing JSON data
+[Jackson](https://github.com/FasterXML/jackson) - a fluent API for processing JSON data
 
-[OkHttp](http://square.github.io/okhttp/) provides a fluent HTTP client
+[OkHttp](http://square.github.io/okhttp/) - a fluent HTTP client
 
 The Neo4J Cypher REST API combines the power of the Cypher query language with a JSON-native API that is very easy to process. 
 
