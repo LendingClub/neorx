@@ -19,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -171,6 +172,20 @@ public class NeoRxClientIntegrationTest extends RxNeoIntegrationTest {
 		}
 	}
 	
+	@Test
+	public void testCreateWithoutReturn() {
+		String id = UUID.randomUUID().toString();
+	
+		Assert.assertNull(getClient().execCypher("create (x:UnitTest {name:{name}})", "name",id).toBlocking().firstOrDefault(null));	
+		Assertions.assertThat(getClient().execCypher("create (x:UnitTest {name:{name}})", "name",id).count().toBlocking().first()).isEqualTo(0);
+		Assertions.assertThat(getClient().execCypher("create (x:UnitTest {name:{name}})", "name",id).toList().toBlocking().first()).isEmpty();
+	}
+	@Test
+	public void testCreateWithReturn() {
+		String id = UUID.randomUUID().toString();
+		JsonNode n = getClient().execCypher("create (x:UnitTest {name:{name}}) return x", "name",id).toBlocking().first();
+		Assert.assertEquals(id,n.path("name").asText());
+	}
 	@Test
 	public void testX() {
 		List<JsonNode> n = getClient().execCypherAsList("match (m:Person) where m.name={name} return m",
