@@ -109,6 +109,14 @@ signing {
 	sign configurations.archives
 }
 
+signArchives.onlyIf { 
+	def signingPropertiesSet = project.ext.has('signing.keyId') 
+	if (!signingPropertiesSet) {
+		println "properties required to sign artifacts not set -- disabling code signing"
+	}
+	return signingPropertiesSet
+}
+
 jacocoTestReport {
     group = "reporting"
     description = "Generate Jacoco coverage reports after running tests."
