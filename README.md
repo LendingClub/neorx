@@ -118,3 +118,9 @@ This example shows the use of an Rx function to transform the result from JsonNo
 		  .toList()
 		  .toBlocking().first();
 ```
+
+Now, let's parameterize the cypher quey:
+```
+  List<JsonNode> people = client
+		  .execCypherAsList("match (p:Person) where p.born>{year} return p","year",1980);
+```
