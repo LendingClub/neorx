@@ -34,17 +34,17 @@ compile "io.macgyver.neorx:neorx:1.0.4"
 
 Instantiate the (thread-safe) client:
 ```java
-	// to http://localhost:7474
-	NeoRxClient client = new NeoRxClient(); 
+// to http://localhost:7474
+NeoRxClient client = new NeoRxClient(); 
 	
-	// to https://neo4j.example.com:7473
-	client = new NeoRxClient("https://neo4j.example.com:7473");
+// to https://neo4j.example.com:7473
+client = new NeoRxClient("https://neo4j.example.com:7473");
 
-	// to https://neo4j.example.com:7473 with certificate validation disabled
-	client = new NeoRxClient("https://neo4j.example.com:7473",false);
+// to https://neo4j.example.com:7473 with certificate validation disabled
+client = new NeoRxClient("https://neo4j.example.com:7473",false);
 
-	// with basic auth
-	client = new NeoRxClient("http://localhost:7474","myusername","mypassword");
+// with basic auth
+client = new NeoRxClient("http://localhost:7474","myusername","mypassword");
 	
 ```
 
