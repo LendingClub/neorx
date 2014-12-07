@@ -1,4 +1,4 @@
-package io.macgyver.neorx.rest.impl.guava;
+package io.macgyver.neorx.rest.impl;
 
 /**
  * Copied from Guava source

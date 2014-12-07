@@ -13,12 +13,12 @@
  */
 package io.macgyver.neorx.rest;
 
-import static io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkArgument;
-import static io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkNotNull;
+import static io.macgyver.neorx.rest.impl.GuavaPreconditions.checkArgument;
+import static io.macgyver.neorx.rest.impl.GuavaPreconditions.checkNotNull;
+import io.macgyver.neorx.rest.impl.GuavaStrings;
 import io.macgyver.neorx.rest.impl.NonStreamingResultImpl;
 import io.macgyver.neorx.rest.impl.ResultMetaDataImpl;
 import io.macgyver.neorx.rest.impl.SslTrust;
-import io.macgyver.neorx.rest.impl.guava.GuavaStrings;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -134,7 +134,7 @@ public class NeoRxClient {
 
 	public Observable<JsonNode> execCypher(String cypher, ObjectNode params) {
 		ObjectNode response = execRawCypher(cypher, params);
-		io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkNotNull(response);
+		io.macgyver.neorx.rest.impl.GuavaPreconditions.checkNotNull(response);
 		NonStreamingResultImpl r = new NonStreamingResultImpl(response);
 		ResultMetaDataImpl md = r.getResultMetaData();
 		if (md.getFieldNames().size() == 1) {
@@ -177,7 +177,7 @@ public class NeoRxClient {
 	}
 
 	protected ObjectNode formatPayload(String cypher, ObjectNode params) {
-		io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkNotNull(cypher);
+		io.macgyver.neorx.rest.impl.GuavaPreconditions.checkNotNull(cypher);
 		ObjectNode payload = mapper.createObjectNode();
 		if (params == null) {
 			params = mapper.createObjectNode();

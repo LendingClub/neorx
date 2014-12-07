@@ -1,6 +1,6 @@
 package io.macgyver.neorx.rest;
 
-import io.macgyver.neorx.rest.impl.guava.GuavaPreconditions;
+import io.macgyver.neorx.rest.impl.GuavaPreconditions;
 
 import java.io.BufferedReader;
 import java.io.IOException;
