@@ -13,6 +13,8 @@
  */
 package io.macgyver.neorx.rest;
 
+import static io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkArgument;
+import static io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkNotNull;
 import io.macgyver.neorx.rest.impl.NonStreamingResultImpl;
 import io.macgyver.neorx.rest.impl.SslTrust;
 import io.macgyver.neorx.rest.impl.guava.GuavaStrings;
@@ -20,6 +22,8 @@ import io.macgyver.neorx.rest.impl.guava.GuavaStrings;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.logging.Level;
 
 import rx.Observable;
 
@@ -48,6 +52,8 @@ public class NeoRxClient {
 	final static ObjectMapper mapper = new ObjectMapper();
 	private volatile OkHttpClient httpClient = null;
 	java.util.logging.Logger logger = java.util.logging.Logger.getLogger(NeoRxClient.class.getName());
+	
+	private final Level REQUEST_RESPONSE_LEVEL=Level.FINE;  // level at which request/response logging will be logged
 	public NeoRxClient() {
 		this(DEFAULT_URL);
 	}
@@ -88,8 +94,8 @@ public class NeoRxClient {
 	}
 
 	protected ObjectNode createParameters(Object... args) {
-		io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkNotNull(args);
-		io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkArgument(args.length % 2 == 0,
+		checkNotNull(args);
+		checkArgument(args.length % 2 == 0,
 				"must be an even number of arguments (key/value pairs)");
 		ObjectNode n = mapper.createObjectNode();
 		for (int i = 0; i < args.length; i += 2) {
@@ -187,6 +193,9 @@ public class NeoRxClient {
 		return payload;
 	}
 
+	private String newRequestId() {
+		return UUID.randomUUID().toString();
+	}
 	protected ObjectNode execRawCypher(String cypher, ObjectNode params) {
 
 		try {
@@ -195,8 +204,11 @@ public class NeoRxClient {
 
 			String payloadString = payload.toString();
 			OkHttpClient c = getClient();
-			io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkNotNull(c);
-
+			checkNotNull(c);
+			String requestId = newRequestId();
+			if (logger.isLoggable(REQUEST_RESPONSE_LEVEL)) {
+				logger.log(REQUEST_RESPONSE_LEVEL, String.format("request[%s]: %s",requestId,payloadString));
+			}
 			Builder builder = new Request.Builder()
 					.addHeader("X-Stream", Boolean.toString(streamResponse))
 					.addHeader("Accept", "application/json")
@@ -216,7 +228,9 @@ public class NeoRxClient {
 
 			ObjectNode jsonResponse = (ObjectNode) mapper.readTree(r.body()
 					.charStream());
-
+			if (logger.isLoggable(REQUEST_RESPONSE_LEVEL)) {
+				logger.log(REQUEST_RESPONSE_LEVEL,String.format("response[%s]: %s",requestId,jsonResponse.toString()));
+			}
 			ObjectNode n = jsonResponse;
 			JsonNode error = n.path("errors").path(0);
 
