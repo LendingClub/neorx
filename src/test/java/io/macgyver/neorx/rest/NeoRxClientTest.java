@@ -119,8 +119,7 @@ public class NeoRxClientTest {
 
 	@Test
 	public void testBasicRequest() {
-		FakeNeoRxClient f = new FakeNeoRxClient();
-
+		
 		String response = "{\"results\":[{\"columns\":[\"p\"],\"data\":[{\"row\":[{\"name\":\"Carrie-Anne Moss\",\"born\":1967}]}]}],\"errors\":[]}";
 
 		List<JsonNode> x = FakeNeoRxClient.withResponse(response)
