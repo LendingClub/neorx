@@ -1,22 +1,12 @@
 package io.macgyver.neorx.rest;
 
+import io.macgyver.neorx.rest.impl.guava.GuavaPreconditions;
+
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.StringWriter;
 import java.net.URL;
-import java.util.List;
-
-import org.assertj.core.util.Lists;
-import org.assertj.core.util.Preconditions;
-
-import com.google.common.base.Charsets;
-import com.google.common.base.Strings;
-import com.google.common.io.Resources;
-
-import rx.Observable;
-import rx.functions.Action1;
 
 public class MovieGraph {
 
@@ -33,7 +23,7 @@ public class MovieGraph {
 	}
 
 	public MovieGraph(NeoRxClient c) {
-		com.google.common.base.Preconditions.checkNotNull(c);
+		GuavaPreconditions.checkNotNull(c);
 		this.client = c;
 	}
 
@@ -56,8 +46,18 @@ public class MovieGraph {
 
 	public void executeClasspath(String name) throws IOException {
 
-		URL url = Resources.getResource(name);
-		String val = Resources.toString(url, Charsets.UTF_8);
+		URL url = Thread.currentThread().getContextClassLoader()
+				.getResource(name);
+
+		BufferedReader sr = new BufferedReader(new InputStreamReader(
+				url.openStream()));
+		String line = null;
+		StringWriter sw = new StringWriter();
+		while ((line = sr.readLine()) != null) {
+			sw.write(line);
+			sw.write("\n");
+		}
+		String val = sw.toString();
 
 		client.execCypher(val);
 

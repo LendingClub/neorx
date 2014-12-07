@@ -2,18 +2,18 @@ package io.macgyver.neorx.rest.impl;
 
 import io.macgyver.neorx.rest.NeoRxException;
 import io.macgyver.neorx.rest.ResultMetaData;
+import io.macgyver.neorx.rest.impl.guava.GuavaPreconditions;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+
 
 public class ResultMetaDataImpl implements ResultMetaData {
 
@@ -22,14 +22,14 @@ public class ResultMetaDataImpl implements ResultMetaData {
 
 	public ResultMetaDataImpl(JsonNode response) {
 
-		Preconditions.checkNotNull(response);
+		GuavaPreconditions.checkNotNull(response);
 		ArrayNode an = (ArrayNode) response.get("columns");
 
-		Preconditions.checkArgument(an!=null,"response must have columns element");
+		GuavaPreconditions.checkArgument(an!=null,"response must have columns element");
 		Iterator<JsonNode> t = an.elements();
 		int column = 0;
-		Map<String, Integer> map = Maps.newConcurrentMap();
-		List<String> list = Lists.newArrayList();
+		Map<String, Integer> map = new ConcurrentHashMap<>();
+		List<String> list = new ArrayList<>();
 		while (t.hasNext()) {
 
 			String name = t.next().asText();
@@ -38,8 +38,10 @@ public class ResultMetaDataImpl implements ResultMetaData {
 
 			column++;
 		}
-		this.columnNames = ImmutableList.copyOf(list);
-		this.columnMap = ImmutableMap.copyOf(map);
+		
+		this.columnNames = Collections.unmodifiableList(list);
+	
+		this.columnMap = Collections.unmodifiableMap(map);
 
 	}
 

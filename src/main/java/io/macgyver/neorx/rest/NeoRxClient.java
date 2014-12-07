@@ -15,8 +15,10 @@ package io.macgyver.neorx.rest;
 
 import io.macgyver.neorx.rest.impl.NonStreamingResultImpl;
 import io.macgyver.neorx.rest.impl.SslTrust;
+import io.macgyver.neorx.rest.impl.guava.GuavaStrings;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -31,10 +33,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.squareup.okhttp.Credentials;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
@@ -96,8 +94,8 @@ public class NeoRxClient {
 	}
 
 	public ObjectNode createParameters(Object... args) {
-		Preconditions.checkNotNull(args);
-		Preconditions.checkArgument(args.length % 2 == 0,
+		io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkNotNull(args);
+		io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkArgument(args.length % 2 == 0,
 				"must be an even number of arguments (key/value pairs)");
 		ObjectNode n = mapper.createObjectNode();
 		for (int i = 0; i < args.length; i += 2) {
@@ -117,7 +115,7 @@ public class NeoRxClient {
 			} else if (val instanceof Boolean) {
 				n.put(key, (Boolean) val);
 			} else if (val instanceof List) {
-				List x = Lists.newArrayList();
+				List x = new ArrayList<>();
 				ArrayNode an = mapper.createArrayNode();
 
 				for (Object item : (List) val) {
@@ -135,7 +133,7 @@ public class NeoRxClient {
 
 	public Observable<JsonNode> execCypher(String cypher, ObjectNode params) {
 		ObjectNode response = execRaw(cypher, params);
-		Preconditions.checkNotNull(response);
+		io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkNotNull(response);
 		NonStreamingResultImpl r = new NonStreamingResultImpl(response);
 		ResultMetaData md = r.getResultMetaData();
 		if (md.getFieldNames().size() == 1) {
@@ -178,7 +176,7 @@ public class NeoRxClient {
 	}
 
 	protected ObjectNode formatPayload(String cypher, ObjectNode params) {
-		Preconditions.checkNotNull(cypher);
+		io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkNotNull(cypher);
 		ObjectNode payload = mapper.createObjectNode();
 		if (params == null) {
 			params = mapper.createObjectNode();
@@ -203,7 +201,7 @@ public class NeoRxClient {
 
 			String payloadString = payload.toString();
 			OkHttpClient c = getClient();
-			Preconditions.checkNotNull(c);
+			io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkNotNull(c);
 
 			Builder builder = new Request.Builder()
 					.addHeader("X-Stream", Boolean.toString(streamResponse))
@@ -212,8 +210,9 @@ public class NeoRxClient {
 					.post(RequestBody.create(
 							MediaType.parse("application/json"), payloadString));
 
-			if (!Strings.isNullOrEmpty(username)
-					&& !Strings.isNullOrEmpty(password)) {
+			
+			if (!GuavaStrings.isNullOrEmpty(username)
+					&& !GuavaStrings.isNullOrEmpty(password)) {
 				builder = builder.addHeader("Authorization",
 						Credentials.basic(username, password));
 			}
