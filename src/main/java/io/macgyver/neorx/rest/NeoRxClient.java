@@ -116,7 +116,7 @@ public class NeoRxClient {
 			} else if (val instanceof Boolean) {
 				n.put(key, (Boolean) val);
 			} else if (val instanceof List) {
-				List x = new ArrayList<>();
+	
 				ArrayNode an = mapper.createArrayNode();
 
 				for (Object item : (List) val) {
@@ -124,8 +124,8 @@ public class NeoRxClient {
 				}
 				n.set(key, an);
 			} else {
-				throw new IllegalArgumentException("type for param " + key
-						+ " not supported: " + val.getClass().getName());
+				throw new IllegalArgumentException("parameter '" + key
+						+ "' type not supported: " + val.getClass().getName());
 			}
 
 		}

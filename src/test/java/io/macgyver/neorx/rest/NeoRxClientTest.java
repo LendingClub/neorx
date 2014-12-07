@@ -15,6 +15,7 @@ package io.macgyver.neorx.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import io.macgyver.neorx.rest.NeoRxClient;
@@ -129,5 +130,20 @@ public class NeoRxClientTest {
 		Assertions.assertThat(x.get(0).get("name").asText()).isEqualTo(
 				"Carrie-Anne Moss");
 
+	}
+	
+	
+	@Test
+	public void testCreateParamsWithInvalidArg() {
+		try {
+			NeoRxClient c = new FakeNeoRxClient();
+
+			Object x = new Object() {};
+			
+			ObjectNode n = c.createParameters( "def", x);
+		} catch (Exception e) {
+			
+			Assertions.assertThat(e).isExactlyInstanceOf(IllegalArgumentException.class).hasMessageContaining("type not supported");
+		}
 	}
 }
