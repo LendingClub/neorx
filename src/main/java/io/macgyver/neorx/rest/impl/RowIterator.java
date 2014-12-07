@@ -1,6 +1,8 @@
 package io.macgyver.neorx.rest.impl;
 
 
+import io.macgyver.neorx.rest.impl.guava.GuavaPreconditions;
+
 import java.util.Iterator;
 import java.util.Map;
 
@@ -8,7 +10,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Preconditions;
 
 public class RowIterator implements Iterator<JsonNode> {
 
@@ -17,9 +18,9 @@ public class RowIterator implements Iterator<JsonNode> {
 	ResultMetaDataImpl metaData;
 	
 	public RowIterator(JsonNode results, ResultMetaDataImpl md) {
-		Preconditions.checkNotNull(results);
-		Preconditions.checkNotNull(md);
-		Preconditions.checkNotNull(results instanceof ArrayNode);
+		GuavaPreconditions.checkNotNull(results);
+		GuavaPreconditions.checkNotNull(md);
+		GuavaPreconditions.checkNotNull(results instanceof ArrayNode);
 		metaData = md;
 		iterator = results.elements();
 	}
