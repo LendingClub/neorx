@@ -3,7 +3,7 @@ package io.macgyver.neorx.rest.impl;
 import java.util.Iterator;
 
 import io.macgyver.neorx.rest.NeoRxException;
-import io.macgyver.neorx.rest.ResultMetaData;
+
 import rx.Observable;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,7 +25,7 @@ public class NonStreamingResultImpl  {
 	}
 	
 	
-	public ResultMetaData getResultMetaData() {
+	public ResultMetaDataImpl getResultMetaData() {
 		return metaData;
 	}
 	public Iterable<JsonNode> iterableRows() {

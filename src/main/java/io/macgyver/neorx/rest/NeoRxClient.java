@@ -16,6 +16,7 @@ package io.macgyver.neorx.rest;
 import static io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkArgument;
 import static io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkNotNull;
 import io.macgyver.neorx.rest.impl.NonStreamingResultImpl;
+import io.macgyver.neorx.rest.impl.ResultMetaDataImpl;
 import io.macgyver.neorx.rest.impl.SslTrust;
 import io.macgyver.neorx.rest.impl.guava.GuavaStrings;
 
@@ -135,7 +136,7 @@ public class NeoRxClient {
 		ObjectNode response = execRawCypher(cypher, params);
 		io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkNotNull(response);
 		NonStreamingResultImpl r = new NonStreamingResultImpl(response);
-		ResultMetaData md = r.getResultMetaData();
+		ResultMetaDataImpl md = r.getResultMetaData();
 		if (md.getFieldNames().size() == 1) {
 
 			return r.rows().flatMap(

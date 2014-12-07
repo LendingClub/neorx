@@ -1,7 +1,6 @@
 package io.macgyver.neorx.rest.impl;
 
 import io.macgyver.neorx.rest.NeoRxException;
-import io.macgyver.neorx.rest.ResultMetaData;
 import io.macgyver.neorx.rest.impl.guava.GuavaPreconditions;
 
 import java.util.ArrayList;
@@ -15,7 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 
-public class ResultMetaDataImpl implements ResultMetaData {
+public class ResultMetaDataImpl  {
 
 	Map<String, Integer> columnMap;
 	List<String> columnNames;
@@ -45,12 +44,12 @@ public class ResultMetaDataImpl implements ResultMetaData {
 
 	}
 
-	@Override
+
 	public List<String> getFieldNames() {
 		return columnNames;
 	}
 
-	@Override
+
 	public int getField(String input) {
 		Integer c = columnMap.get(input);
 		if (c == null) {
