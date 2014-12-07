@@ -24,23 +24,17 @@ import java.util.UUID;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import rx.Observable;
 import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.observables.BlockingObservable;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.NumericNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 
-public class NeoRxClientIntegrationTest extends RxNeoIntegrationTest {
+public class NeoRxClientIntegrationTest extends AbstractIntegrationTest {
 
-	Logger logger = LoggerFactory.getLogger(NeoRxClientIntegrationTest.class);
 
 
 	@Test
