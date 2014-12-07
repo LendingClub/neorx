@@ -20,11 +20,8 @@ import io.macgyver.neorx.rest.impl.guava.GuavaStrings;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
-import sun.util.logging.PlatformLogger.Level;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
