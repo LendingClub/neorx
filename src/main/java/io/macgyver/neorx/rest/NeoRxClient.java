@@ -23,10 +23,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import rx.Observable;
+import sun.util.logging.PlatformLogger.Level;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,7 +41,6 @@ import com.squareup.okhttp.Response;
 
 public class NeoRxClient {
 
-	private Logger logger = LoggerFactory.getLogger(NeoRxClient.class);
 
 	public static final String DEFAULT_URL = "http://localhost:7474";
 	private String url = DEFAULT_URL;
@@ -53,7 +50,7 @@ public class NeoRxClient {
 	private boolean streamResponse = true;
 	final static ObjectMapper mapper = new ObjectMapper();
 	private volatile OkHttpClient httpClient = null;
-
+	java.util.logging.Logger logger = java.util.logging.Logger.getLogger(NeoRxClient.class.getName());
 	public NeoRxClient() {
 		this(DEFAULT_URL);
 	}
@@ -273,8 +270,8 @@ public class NeoRxClient {
 				return true;
 			}
 
-		} catch (Exception e) {
-			logger.warn(e.toString());
+		} catch (IOException | RuntimeException e) {
+			logger.log(java.util.logging.Level.WARNING,e.toString());
 		}
 		return false;
 	}
