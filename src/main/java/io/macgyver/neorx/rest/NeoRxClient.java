@@ -87,7 +87,7 @@ public class NeoRxClient {
 		return httpClient;
 	}
 
-	public ObjectNode createParameters(Object... args) {
+	protected ObjectNode createParameters(Object... args) {
 		io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkNotNull(args);
 		io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkArgument(args.length % 2 == 0,
 				"must be an even number of arguments (key/value pairs)");
@@ -126,7 +126,7 @@ public class NeoRxClient {
 	}
 
 	public Observable<JsonNode> execCypher(String cypher, ObjectNode params) {
-		ObjectNode response = execRaw(cypher, params);
+		ObjectNode response = execRawCypher(cypher, params);
 		io.macgyver.neorx.rest.impl.guava.GuavaPreconditions.checkNotNull(response);
 		NonStreamingResultImpl r = new NonStreamingResultImpl(response);
 		ResultMetaData md = r.getResultMetaData();
@@ -165,8 +165,8 @@ public class NeoRxClient {
 		return execCypher(cypher, createParameters(params));
 	}
 
-	protected ObjectNode execRaw(String cypher, Object... args) {
-		return execRaw(cypher, createParameters(args));
+	protected ObjectNode execRawCypher(String cypher, Object... args) {
+		return execRawCypher(cypher, createParameters(args));
 	}
 
 	protected ObjectNode formatPayload(String cypher, ObjectNode params) {
@@ -187,7 +187,7 @@ public class NeoRxClient {
 		return payload;
 	}
 
-	protected ObjectNode execRaw(String cypher, ObjectNode params) {
+	protected ObjectNode execRawCypher(String cypher, ObjectNode params) {
 
 		try {
 
@@ -236,25 +236,15 @@ public class NeoRxClient {
 		return validateCertificates;
 	}
 
-	public void setCertificateValidationEnabled(boolean validateCertificates) {
-		this.validateCertificates = validateCertificates;
-	}
+
 
 	public String getUrl() {
 		return url;
 	}
 
-	public void setUrl(String url) {
-		this.url = url;
-	}
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+
 
 	public boolean checkConnection() {
 		try {
