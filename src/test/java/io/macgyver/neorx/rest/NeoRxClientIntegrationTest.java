@@ -32,40 +32,46 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.NumericNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-
 public class NeoRxClientIntegrationTest extends AbstractIntegrationTest {
-
-
 
 	@Test
 	public void testEmptyResult() {
 		// since we only return a single entity, we "unwrap" the value to make
 		// it easier to process
 
-		List<JsonNode> r = getClient().execCypher("match (m:Person) where m.name='not found' return m"
-				).toList().toBlocking().first();
-		
+		List<JsonNode> r = getClient()
+				.execCypher(
+						"match (m:Person) where m.name='not found' return m")
+				.toList().toBlocking().first();
+
 		Assert.assertNotNull(r);
 		Assertions.assertThat(r).isEmpty();
-		
-		r = getClient().execCypher("match (m:Person) where m.name={name} return m.name,m.born","name","invalid"
-				).toList().toBlocking().first();
-		
+
+		r = getClient()
+				.execCypher(
+						"match (m:Person) where m.name={name} return m.name,m.born",
+						"name", "invalid").toList().toBlocking().first();
+
 		Assert.assertNotNull(r);
 		Assertions.assertThat(r).isEmpty();
-		
-		BlockingObservable<JsonNode>bo = getClient().execCypher("match (m:Person) where m.name={name} return m.name,m.born","name","invalid"
-				).toBlocking();
+
+		BlockingObservable<JsonNode> bo = getClient().execCypher(
+				"match (m:Person) where m.name={name} return m.name,m.born",
+				"name", "invalid").toBlocking();
 		Assert.assertFalse(bo.getIterator().hasNext());
-		
-		Assert.assertTrue(getClient().execCypher("match (m:Person) where m.name={name} return m.name,m.born","name","invalid"
-				).count().toBlocking().first()==0);
-		
-		
-		Assert.assertNull(getClient().execCypher("match (m:Person) where m.name='not found' return m"
-				).toBlocking().firstOrDefault(null));
-	
+
+		Assert.assertTrue(getClient()
+				.execCypher(
+						"match (m:Person) where m.name={name} return m.name,m.born",
+						"name", "invalid").count().toBlocking().first() == 0);
+
+		Assert.assertNull(getClient()
+				.execCypher(
+						"match (m:Person) where m.name='not found' return m")
+				.toBlocking().firstOrDefault(null));
+
 	}
+
 	@Test
 	public void testUnwrapped() {
 		// since we only return a single entity, we "unwrap" the value to make
@@ -81,19 +87,24 @@ public class NeoRxClientIntegrationTest extends AbstractIntegrationTest {
 			}
 		});
 	}
+
 	@Test
 	public void testUnwrappedBlockingTransform() {
-		
-		// find all the people in the graph born after 1960 and return a list of their names
 
-		List<String> n = getClient().execCypher("match (m:Person) where m.born>{born} return m.name",
-				"born", 1960).flatMap(NeoRxFunctions.jsonNodeToString()).toList().toBlocking().first();
-	
+		// find all the people in the graph born after 1960 and return a list of
+		// their names
+
+		List<String> n = getClient()
+				.execCypher(
+						"match (m:Person) where m.born>{born} return m.name",
+						"born", 1960)
+				.flatMap(NeoRxFunctions.jsonNodeToString()).toList()
+				.toBlocking().first();
+
 		assertThat(n).contains("Meg Ryan");
-	
-	
-		
+
 	}
+
 	@Test
 	public void testUnwrappedNull() {
 		// since we only return a single entity, we "unwrap" the value to make
@@ -112,13 +123,12 @@ public class NeoRxClientIntegrationTest extends AbstractIntegrationTest {
 		});
 	}
 
-	
-	
 	@Test
 	public void testCreateParameters() {
-		ObjectNode n = getClient().createParameters("abc",null);
+		ObjectNode n = getClient().createParameters("abc", null);
 		Assertions.assertThat(n.get("abc").isNull()).isTrue();
 	}
+
 	@Test
 	public void testWrapped() {
 
@@ -155,6 +165,15 @@ public class NeoRxClientIntegrationTest extends AbstractIntegrationTest {
 	}
 
 	@Test
+	public void testCertificateVerifiction() {
+		NeoRxClient c = new NeoRxClient("https://localhost:7473", false);
+		Assertions.assertThat(c.isCertificateVerificationEnabled()).isFalse();
+
+		c = new NeoRxClient("https://localhost:7473", true);
+		Assertions.assertThat(c.isCertificateVerificationEnabled()).isTrue();
+	}
+
+	@Test
 	public void testInvalidCypher() {
 
 		try {
@@ -165,36 +184,53 @@ public class NeoRxClientIntegrationTest extends AbstractIntegrationTest {
 
 		}
 	}
-	
+
 	@Test
 	public void testCreateWithoutReturn() {
 		String id = UUID.randomUUID().toString();
-	
-		Assert.assertNull(getClient().execCypher("create (x:UnitTest {name:{name}})", "name",id).toBlocking().firstOrDefault(null));	
-		Assertions.assertThat(getClient().execCypher("create (x:UnitTest {name:{name}})", "name",id).count().toBlocking().first()).isEqualTo(0);
-		Assertions.assertThat(getClient().execCypher("create (x:UnitTest {name:{name}})", "name",id).toList().toBlocking().first()).isEmpty();
+
+		Assert.assertNull(getClient()
+				.execCypher("create (x:UnitTest {name:{name}})", "name", id)
+				.toBlocking().firstOrDefault(null));
+		Assertions.assertThat(
+				getClient()
+						.execCypher("create (x:UnitTest {name:{name}})",
+								"name", id).count().toBlocking().first())
+				.isEqualTo(0);
+		Assertions.assertThat(
+				getClient()
+						.execCypher("create (x:UnitTest {name:{name}})",
+								"name", id).toList().toBlocking().first())
+				.isEmpty();
 	}
+
 	@Test
 	public void testCreateWithReturn() {
 		String id = UUID.randomUUID().toString();
-		JsonNode n = getClient().execCypher("create (x:UnitTest {name:{name}}) return x", "name",id).toBlocking().first();
-		Assert.assertEquals(id,n.path("name").asText());
+		JsonNode n = getClient()
+				.execCypher("create (x:UnitTest {name:{name}}) return x",
+						"name", id).toBlocking().first();
+		Assert.assertEquals(id, n.path("name").asText());
 	}
+
 	@Test
 	public void testX() {
-		List<JsonNode> n = getClient().execCypherAsList("match (m:Person) where m.name={name} return m",
-				"name", "Carrie-Anne Moss");
-	
+		List<JsonNode> n = getClient().execCypherAsList(
+				"match (m:Person) where m.name={name} return m", "name",
+				"Carrie-Anne Moss");
+
 		Assertions.assertThat(n.get(0).path("born").asInt()).isEqualTo(1967);
-	
-		
-		 n = getClient().execCypherAsList("match (m:Person) where m.name={name} return m.born",
-				"name", "Carrie-Anne Moss");
+
+		n = getClient().execCypherAsList(
+				"match (m:Person) where m.name={name} return m.born", "name",
+				"Carrie-Anne Moss");
 		Assertions.assertThat(n.get(0).asInt()).isEqualTo(1967);
-		
-		n = getClient().execCypherAsList("match (m:Person) where m.name={name} return m.name,m.born",
+
+		n = getClient().execCypherAsList(
+				"match (m:Person) where m.name={name} return m.name,m.born",
 				"name", "Carrie-Anne Moss");
 		Assertions.assertThat(n.get(0).path("m.born").asInt()).isEqualTo(1967);
-		Assertions.assertThat(n.get(0).path("m.name").asText()).isEqualTo("Carrie-Anne Moss");
+		Assertions.assertThat(n.get(0).path("m.name").asText()).isEqualTo(
+				"Carrie-Anne Moss");
 	}
 }

@@ -16,6 +16,9 @@ public class NeoRxFunctions {
 				if (t1==null) {
 					return Observable.just(null);
 				}
+				else if (t1 instanceof NullNode) {
+					return Observable.just(null);
+				}
 				else {
 					return Observable.just(t1.asText());
 				}
