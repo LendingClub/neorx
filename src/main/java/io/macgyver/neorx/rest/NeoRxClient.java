@@ -44,11 +44,12 @@ import com.squareup.okhttp.Response;
 public class NeoRxClient {
 
 
+	public static final boolean CERTIFICATE_VALIDATION_DEFAULT=true;
 	public static final String DEFAULT_URL = "http://localhost:7474";
 	private String url = DEFAULT_URL;
 	private String username = null;
 	private String password = null;
-	private boolean validateCertificates = false;
+	private boolean validateCertificates = CERTIFICATE_VALIDATION_DEFAULT;
 	private boolean streamResponse = true;
 	final static ObjectMapper mapper = new ObjectMapper();
 	private volatile OkHttpClient httpClient = null;
@@ -60,13 +61,13 @@ public class NeoRxClient {
 	}
 
 	public NeoRxClient(String url) {
-		this(url, null, null, false);
+		this(url, null, null, CERTIFICATE_VALIDATION_DEFAULT);
 	}
 	public NeoRxClient(String url, boolean validateCertificates) {
 		this(url, null, null, validateCertificates);
 	}
 	public NeoRxClient(String url, String username, String password) {
-		this(url, username, password, false);
+		this(url, username, password, CERTIFICATE_VALIDATION_DEFAULT);
 	}
 
 	public NeoRxClient(String url, String username, String password,
@@ -247,10 +248,9 @@ public class NeoRxClient {
 		}
 	}
 
-	public boolean isCertificateVerificationEnabled() {
+	public boolean isCeritificateValidationEnabled() {
 		return validateCertificates;
 	}
-
 
 
 	public String getUrl() {

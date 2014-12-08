@@ -167,10 +167,10 @@ public class NeoRxClientIntegrationTest extends AbstractIntegrationTest {
 	@Test
 	public void testCertificateVerifiction() {
 		NeoRxClient c = new NeoRxClient("https://localhost:7473", false);
-		Assertions.assertThat(c.isCertificateVerificationEnabled()).isFalse();
+		Assertions.assertThat(c.isCeritificateValidationEnabled()).isFalse();
 
 		c = new NeoRxClient("https://localhost:7473", true);
-		Assertions.assertThat(c.isCertificateVerificationEnabled()).isTrue();
+		Assertions.assertThat(c.isCeritificateValidationEnabled()).isTrue();
 	}
 
 	@Test

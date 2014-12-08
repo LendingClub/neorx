@@ -166,4 +166,15 @@ public class NeoRxClientTest {
 		};
 		Assertions.assertThat(c.checkConnection()).isFalse();
 	}
+	
+	@Test
+	public void testCertValidationDefaults() {
+		Assertions.assertThat(new NeoRxClient().isCeritificateValidationEnabled()).isTrue();
+		Assertions.assertThat(new NeoRxClient("http://localhost:7474").isCeritificateValidationEnabled()).isTrue();
+		Assertions.assertThat(new NeoRxClient("http://localhost:7474",true).isCeritificateValidationEnabled()).isTrue();
+		Assertions.assertThat(new NeoRxClient("http://localhost:7474",false).isCeritificateValidationEnabled()).isFalse();
+		Assertions.assertThat(new NeoRxClient("http://localhost:7474",true).isCeritificateValidationEnabled()).isTrue();
+		Assertions.assertThat(new NeoRxClient("http://localhost:7474","user","pass",false).isCeritificateValidationEnabled()).isFalse();
+		Assertions.assertThat(new NeoRxClient("http://localhost:7474","user","pass",true).isCeritificateValidationEnabled()).isTrue();
+	}
 }
