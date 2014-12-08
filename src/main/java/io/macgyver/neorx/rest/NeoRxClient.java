@@ -210,7 +210,7 @@ public class NeoRxClient {
 			if (logger.isLoggable(REQUEST_RESPONSE_LEVEL)) {
 				logger.log(REQUEST_RESPONSE_LEVEL, String.format("request[%s]: %s",requestId,payloadString));
 			}
-			Builder builder = new Request.Builder()
+			Builder builder = injectCredentials(new Request.Builder())
 					.addHeader("X-Stream", Boolean.toString(streamResponse))
 					.addHeader("Accept", "application/json")
 					.url(getUrl() + "/db/data/transaction/commit")
@@ -258,16 +258,26 @@ public class NeoRxClient {
 	}
 
 
-
+	protected Request.Builder injectCredentials(Request.Builder builder) {
+		if (!GuavaStrings.isNullOrEmpty(username)
+				&& !GuavaStrings.isNullOrEmpty(password)) {
+			return builder.addHeader("Authorization",
+					Credentials.basic(username, password));
+		}
+		else {
+			return  builder;
+		}
+	}
 
 
 	public boolean checkConnection() {
 		try {
 
 			Response r = getClient().newCall(
-					new Request.Builder().url(getUrl()).build()).execute();
+					injectCredentials(new Request.Builder()).url(getUrl()+"/db/data/").build()).execute();
 
 			if (r.isSuccessful()) {
+				
 				r.body().close();
 				return true;
 			}

@@ -17,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.UUID;
 
 import io.macgyver.neorx.rest.NeoRxClient;
 
@@ -145,5 +146,24 @@ public class NeoRxClientTest {
 			
 			Assertions.assertThat(e).isExactlyInstanceOf(IllegalArgumentException.class).hasMessageContaining("type not supported");
 		}
+	}
+	
+	@Test
+	public void testCheckConnection() {
+		NeoRxClient c = new NeoRxClient() {
+			public String getUrl() {
+			
+				return "http://invalid."+UUID.randomUUID().toString()+".com";
+			}
+		};
+		Assertions.assertThat(c.checkConnection()).isFalse();
+		
+		 c = new FakeNeoRxClient() {
+			public String getUrl() {
+				//throw new RuntimeException("simulated failure");
+				return "foo://bar";
+			}
+		};
+		Assertions.assertThat(c.checkConnection()).isFalse();
 	}
 }
