@@ -26,6 +26,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import rx.Observable;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -43,8 +46,7 @@ import com.squareup.okhttp.Response;
 
 public class NeoRxClient {
 
-
-	public static final boolean CERTIFICATE_VALIDATION_DEFAULT=true;
+	public static final boolean CERTIFICATE_VALIDATION_DEFAULT = true;
 	public static final String DEFAULT_URL = "http://localhost:7474";
 	private String url = DEFAULT_URL;
 	private String username = null;
@@ -53,9 +55,13 @@ public class NeoRxClient {
 	private boolean streamResponse = true;
 	final static ObjectMapper mapper = new ObjectMapper();
 	private volatile OkHttpClient httpClient = null;
-	java.util.logging.Logger logger = java.util.logging.Logger.getLogger(NeoRxClient.class.getName());
-	
-	private final Level REQUEST_RESPONSE_LEVEL=Level.FINE;  // level at which request/response logging will be logged
+	Logger logger = LoggerFactory.getLogger(NeoRxClient.class);
+
+	private final Level REQUEST_RESPONSE_LEVEL = Level.FINE; // level at which
+																// request/response
+																// logging will
+																// be logged
+
 	public NeoRxClient() {
 		this(DEFAULT_URL);
 	}
@@ -63,9 +69,11 @@ public class NeoRxClient {
 	public NeoRxClient(String url) {
 		this(url, null, null, CERTIFICATE_VALIDATION_DEFAULT);
 	}
+
 	public NeoRxClient(String url, boolean validateCertificates) {
 		this(url, null, null, validateCertificates);
 	}
+
 	public NeoRxClient(String url, String username, String password) {
 		this(url, username, password, CERTIFICATE_VALIDATION_DEFAULT);
 	}
@@ -73,6 +81,9 @@ public class NeoRxClient {
 	public NeoRxClient(String url, String username, String password,
 			boolean validateCertificates) {
 
+		while (url.endsWith("/")) {
+			url = url.substring(0,url.length()-1);
+		}
 		this.url = url;
 		this.username = username;
 		this.password = password;
@@ -117,7 +128,7 @@ public class NeoRxClient {
 			} else if (val instanceof Boolean) {
 				n.put(key, (Boolean) val);
 			} else if (val instanceof List) {
-	
+
 				ArrayNode an = mapper.createArrayNode();
 
 				for (Object item : (List) val) {
@@ -141,8 +152,8 @@ public class NeoRxClient {
 		if (md.getFieldNames().size() == 1) {
 
 			return r.rows().flatMap(
-					
-					NeoRxFunctions.extractField(md.getFieldNames().get(0)));
+
+			NeoRxFunctions.extractField(md.getFieldNames().get(0)));
 		} else {
 			return r.rows();
 		}
@@ -150,8 +161,9 @@ public class NeoRxClient {
 	}
 
 	/**
-	 * Convenience method for returning neo4j results as a List<JsonNode>.
-	 * Same as: client.execCypher(s,params).toList().toBlocking().first()
+	 * Convenience method for returning neo4j results as a List<JsonNode>. Same
+	 * as: client.execCypher(s,params).toList().toBlocking().first()
+	 * 
 	 * @param cypher
 	 * @param params
 	 * @return List of JsonNode
@@ -159,9 +171,11 @@ public class NeoRxClient {
 	public List<JsonNode> execCypherAsList(String cypher, Object... params) {
 		return execCypherAsList(cypher, createParameters(params));
 	}
+
 	/**
-	 * Convenience method for returning neo4j results as a List<JsonNode>.
-	 * Same as: client.execCypher(s,params).toList().toBlocking().first()
+	 * Convenience method for returning neo4j results as a List<JsonNode>. Same
+	 * as: client.execCypher(s,params).toList().toBlocking().first()
+	 * 
 	 * @param cypher
 	 * @param params
 	 * @return List of JsonNode
@@ -169,6 +183,7 @@ public class NeoRxClient {
 	public List<JsonNode> execCypherAsList(String cypher, ObjectNode n) {
 		return execCypher(cypher, n).toList().toBlocking().first();
 	}
+
 	public Observable<JsonNode> execCypher(String cypher, Object... params) {
 		return execCypher(cypher, createParameters(params));
 	}
@@ -198,6 +213,7 @@ public class NeoRxClient {
 	private String newRequestId() {
 		return UUID.randomUUID().toString();
 	}
+
 	protected ObjectNode execRawCypher(String cypher, ObjectNode params) {
 
 		try {
@@ -208,8 +224,9 @@ public class NeoRxClient {
 			OkHttpClient c = getClient();
 			checkNotNull(c);
 			String requestId = newRequestId();
-			if (logger.isLoggable(REQUEST_RESPONSE_LEVEL)) {
-				logger.log(REQUEST_RESPONSE_LEVEL, String.format("request[%s]: %s",requestId,payloadString));
+			if (logger.isDebugEnabled()) {
+				logger.debug(String.format("request[%s]: %s", requestId,
+						payloadString));
 			}
 			Builder builder = injectCredentials(new Request.Builder())
 					.addHeader("X-Stream", Boolean.toString(streamResponse))
@@ -218,7 +235,6 @@ public class NeoRxClient {
 					.post(RequestBody.create(
 							MediaType.parse("application/json"), payloadString));
 
-			
 			if (!GuavaStrings.isNullOrEmpty(username)
 					&& !GuavaStrings.isNullOrEmpty(password)) {
 				builder = builder.addHeader("Authorization",
@@ -230,8 +246,9 @@ public class NeoRxClient {
 
 			ObjectNode jsonResponse = (ObjectNode) mapper.readTree(r.body()
 					.charStream());
-			if (logger.isLoggable(REQUEST_RESPONSE_LEVEL)) {
-				logger.log(REQUEST_RESPONSE_LEVEL,String.format("response[%s]: %s",requestId,jsonResponse.toString()));
+			if (logger.isDebugEnabled()) {
+				logger.debug(String.format("response[%s]: %s", requestId,
+						jsonResponse.toString()));
 			}
 			ObjectNode n = jsonResponse;
 			JsonNode error = n.path("errors").path(0);
@@ -252,38 +269,37 @@ public class NeoRxClient {
 		return validateCertificates;
 	}
 
-
 	public String getUrl() {
 		return url;
 	}
-
 
 	protected Request.Builder injectCredentials(Request.Builder builder) {
 		if (!GuavaStrings.isNullOrEmpty(username)
 				&& !GuavaStrings.isNullOrEmpty(password)) {
 			return builder.addHeader("Authorization",
 					Credentials.basic(username, password));
-		}
-		else {
-			return  builder;
+		} else {
+			return builder;
 		}
 	}
-
 
 	public boolean checkConnection() {
 		try {
 
 			Response r = getClient().newCall(
-					injectCredentials(new Request.Builder()).url(getUrl()+"/db/data/").build()).execute();
+					injectCredentials(new Request.Builder()).url(
+							getUrl() + "/db/data/").build()).execute();
 
 			if (r.isSuccessful()) {
-				
+
 				r.body().close();
 				return true;
 			}
 
 		} catch (IOException | RuntimeException e) {
-			logger.log(java.util.logging.Level.WARNING,e.toString());
+
+			logger.warn(e.toString());
+
 		}
 		return false;
 	}

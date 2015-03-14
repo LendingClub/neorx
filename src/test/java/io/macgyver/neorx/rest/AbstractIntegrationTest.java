@@ -15,11 +15,13 @@ package io.macgyver.neorx.rest;
 
 import org.junit.Assume;
 import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public abstract class AbstractIntegrationTest {
+public abstract class AbstractIntegrationTest extends NeoRxUnitTest {
 
 
-	java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AbstractIntegrationTest.class.getName());
+	Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 	static Boolean available = null;
 	private static NeoRxClient client;
 

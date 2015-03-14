@@ -1,6 +1,7 @@
 package io.macgyver.neorx.rest.impl;
 
 import io.macgyver.neorx.rest.NeoRxException;
+import io.macgyver.neorx.rest.NeoRxUnitTest;
 import io.macgyver.neorx.rest.impl.ResultMetaDataImpl;
 
 import org.assertj.core.api.Assertions;
@@ -10,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class ResultMetaDataImplTest {
+public class ResultMetaDataImplTest extends NeoRxUnitTest {
 
 	static ObjectMapper mapper = new ObjectMapper();
 	

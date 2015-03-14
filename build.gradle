@@ -1,12 +1,13 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'idea'
 apply plugin: 'maven'
 apply plugin: 'application'
 apply plugin: "jacoco"
 apply plugin: "signing"
 
 group 'io.macgyver.neorx'
-version = "1.0.6"
+version = "1.1.0"
 configurations {
 	//all*.exclude group: 'org.codehaus.groovy', module: 'groovy'
 	all*.exclude group: 'log4j'
@@ -17,7 +18,7 @@ configurations {
 repositories {
    mavenLocal()
    mavenCentral()
-	jcenter()
+   jcenter()
    
 
 }
@@ -29,18 +30,22 @@ dependencies {
 
 
 	compile "io.reactivex:rxjava:${RXJAVA_VERSION}"
-	compile 'com.fasterxml.jackson.core:jackson-databind:2.4.4'
-	compile 'com.squareup.okhttp:okhttp:2.1.0'
-
+	compile "com.fasterxml.jackson.core:jackson-databind:${JACKSON_VERSION}"
+	compile "com.squareup.okhttp:okhttp:${OKHTTP_VERSION}"
+	compile "org.slf4j:slf4j-api:${SLF4J_VERSION}"
+	
 	
 	testCompile 'org.assertj:assertj-core:1.7.0'  
 	testCompile 'org.kohsuke:wordnet-random-name:1.2'  
 	testCompile "junit:junit:${JUNIT_VERSION}"
+	testCompile "com.squareup.okhttp:mockwebserver:${OKHTTP_VERSION}"
+	testCompile "ch.qos.logback:logback-classic:${LOGBACK_VERSION}"
+	testCompile "org.slf4j:jul-to-slf4j:${SLF4J_VERSION}"
 
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.2.1'
+    gradleVersion = '2.3'
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {

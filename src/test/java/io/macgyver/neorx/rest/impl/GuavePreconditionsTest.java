@@ -1,10 +1,12 @@
 package io.macgyver.neorx.rest.impl;
 
+import io.macgyver.neorx.rest.NeoRxUnitTest;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class GuavePreconditionsTest {
+public class GuavePreconditionsTest extends NeoRxUnitTest {
 
 	@Test
 	public void testPositive() {

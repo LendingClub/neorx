@@ -5,3 +5,8 @@ build
 .settings
 .classpath
 .project
+.idea/
+*.iml
+*.ipr
+*.iws
+*.swp

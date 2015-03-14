@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
-public class NeoRxFunctionsTest {
+public class NeoRxFunctionsTest extends NeoRxUnitTest {
 
 	@Test
 	public void testExtractField() {

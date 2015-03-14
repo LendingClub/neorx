@@ -1,10 +1,11 @@
 package io.macgyver.neorx.rest.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import io.macgyver.neorx.rest.NeoRxUnitTest;
 
 import org.junit.Test;
 
-public class GuavaStringsTest {
+public class GuavaStringsTest extends NeoRxUnitTest {
 
 	
 	@Test

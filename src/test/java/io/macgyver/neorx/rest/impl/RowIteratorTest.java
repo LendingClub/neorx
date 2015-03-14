@@ -1,6 +1,7 @@
 package io.macgyver.neorx.rest.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import io.macgyver.neorx.rest.NeoRxUnitTest;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
@@ -11,7 +12,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class RowIteratorTest {
+public class RowIteratorTest extends NeoRxUnitTest {
 
 	@Test
 	public void createTest() throws IOException {
