@@ -1,16 +1,16 @@
 package io.macgyver.neorx.rest;
 
+import io.macgyver.neorx.rest.impl.GuavaPreconditions;
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.assertj.core.util.Lists;
-import org.assertj.core.util.Maps;
-import org.assertj.core.util.Preconditions;
-import org.assertj.core.util.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,7 @@ public class MockNeoRxClient extends NeoRxClient {
 		return b;
 	}
 	public MockNeoRxClient enqueue(ObjectNode n) {
-		Preconditions.checkNotNull(n);
+		GuavaPreconditions.checkNotNull(n);
 		fakeResponseStack.push(n);
 		return this;
 	}
@@ -69,8 +69,8 @@ public class MockNeoRxClient extends NeoRxClient {
 
 	public static class MockResponseBuilder {
 		Logger logger = LoggerFactory.getLogger(MockResponseBuilder.class);
-		private List<String> columns = Lists.newArrayList();
-		private List<Map<String, Object>> dataList = Lists.newArrayList();
+		private List<String> columns = new ArrayList<String>();
+		private List<Map<String, Object>> dataList = new ArrayList<Map<String,Object>>();
 		private MockNeoRxClient mockClient;
 		
 		public MockNeoRxClient endResponse() {
@@ -82,7 +82,7 @@ public class MockNeoRxClient extends NeoRxClient {
 			return c;
 		}
 		public MockResponseBuilder row(Object... tuples) {
-			Map<String, Object> t = Maps.newHashMap();
+			Map<String, Object> t = new HashMap<String, Object>();
 			for (int i = 0; i < tuples.length; i += 2) {
 				if (!columns.contains(tuples[i].toString())) {
 					columns.add(tuples[i].toString());
