@@ -17,7 +17,9 @@ public class NonStreamingResultImpl  {
 	
 	public NonStreamingResultImpl(ObjectNode n) {
 		ObjectNode r = (ObjectNode) n.path("results").get(0);
-		
+		if (r==null) {
+			throw new NeoRxException("malformed response: expected 'results' object node");
+		}
 		data = (ArrayNode) r.get("data");
 		metaData = new ResultMetaDataImpl(r);
 		

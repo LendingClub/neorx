@@ -82,6 +82,7 @@ public class NeoRxClientTest extends NeoRxUnitTest {
 		String query = "match (n:MyNode) where n.val={a} return n";
 		ObjectNode n = c.formatPayload(query, c.createParameters("a", 1));
 
+		
 		Assertions.assertThat(
 				n.path("statements").get(0).path("statement").asText())
 				.isEqualTo(query);
@@ -124,7 +125,7 @@ public class NeoRxClientTest extends NeoRxUnitTest {
 	public void testCreateParamsWithOddArgs() {
 
 		try {
-			NeoRxClient c = new FakeNeoRxClient();
+			NeoRxClient c = new MockNeoRxClient();
 
 			ObjectNode n = c.createParameters("abc", "def", "xxx");
 		} catch (Exception e) {
@@ -179,8 +180,8 @@ public class NeoRxClientTest extends NeoRxUnitTest {
 
 		String response = "{\"results\":[{\"columns\":[\"p\"],\"data\":[{\"row\":[{\"name\":\"Carrie-Anne Moss\",\"born\":1967}]}]}],\"errors\":[]}";
 
-		List<JsonNode> x = FakeNeoRxClient.withResponse(response)
-				.execCypher(null).toList().toBlocking().first();
+		List<JsonNode> x = new MockNeoRxClient().enqueue(response).
+				execCypher(null).toList().toBlocking().first();
 
 		Assertions.assertThat(x).hasSize(1);
 		Assertions.assertThat(x.get(0).get("name").asText()).isEqualTo(
@@ -191,7 +192,7 @@ public class NeoRxClientTest extends NeoRxUnitTest {
 	@Test
 	public void testCreateParamsWithInvalidArg() {
 		try {
-			NeoRxClient c = new FakeNeoRxClient();
+			NeoRxClient c = new MockNeoRxClient();
 
 			Object x = new Object() {
 			};
@@ -216,7 +217,7 @@ public class NeoRxClientTest extends NeoRxUnitTest {
 		};
 		Assertions.assertThat(c.checkConnection()).isFalse();
 
-		c = new FakeNeoRxClient() {
+		c = new MockNeoRxClient() {
 			public String getUrl() {
 				// throw new RuntimeException("simulated failure");
 				return "foo://bar";
