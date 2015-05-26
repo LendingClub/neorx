@@ -20,8 +20,7 @@ public class MockNeoRxClientTest {
 	public void testEmptyStack() throws IOException, JsonProcessingException{
 		
 		MockNeoRxClient x = new MockNeoRxClient();
-		Assertions.assertThat(x.checkConnection()).isTrue();
-		
+	
 		try {
 			x.execCypher("match (t:Test) return t");
 		}
