@@ -2,7 +2,6 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'maven'
-apply plugin: 'application'
 apply plugin: "jacoco"
 apply plugin: "signing"
 

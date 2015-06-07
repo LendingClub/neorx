@@ -23,6 +23,7 @@ import io.macgyver.neorx.rest.impl.SslTrust;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -127,6 +128,7 @@ public class NeoRxClient {
 				n.put(key, (Double) val);
 			} else if (val instanceof Boolean) {
 				n.put(key, (Boolean) val);
+			
 			} else if (val instanceof List) {
 
 				ArrayNode an = mapper.createArrayNode();
@@ -135,7 +137,14 @@ public class NeoRxClient {
 					an.add(item.toString());
 				}
 				n.set(key, an);
-			} else {
+			} 
+			else if (val instanceof Map) {
+				n.set(key, mapToObjectNode((Map) val));
+			}
+			else if (val instanceof ObjectNode) {
+				n.set(key, (ObjectNode) val);
+			}
+			else {
 				throw new IllegalArgumentException("parameter '" + key
 						+ "' type not supported: " + val.getClass().getName());
 			}
@@ -302,5 +311,10 @@ public class NeoRxClient {
 
 		}
 		return false;
+	}
+	
+	private ObjectNode mapToObjectNode(Map m) {
+		return mapper.valueToTree(m);
+		
 	}
 }

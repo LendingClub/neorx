@@ -18,7 +18,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
@@ -29,6 +31,7 @@ import rx.functions.Action1;
 import rx.observables.BlockingObservable;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NumericNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -127,6 +130,50 @@ public class NeoRxClientIntegrationTest extends AbstractIntegrationTest {
 	public void testCreateParameters() {
 		ObjectNode n = getClient().createParameters("abc", null);
 		Assertions.assertThat(n.get("abc").isNull()).isTrue();
+	}
+
+	@Test
+	public void testMultiProps() {
+		String id = UUID.randomUUID().toString();
+
+		ObjectNode props = new ObjectMapper().createObjectNode()
+				.put("city", "San Francisco").put("state", "CA")
+				.put("mayor", "Ed Lee");
+		getClient().execCypher("match (mp:TestMultiProp) delete mp");
+		getClient()
+				.execCypher(
+						"MERGE (mp:TestMultiProp {city:{city}}) set mp={props} return mp",
+						"city", props.path("city").asText(), "props", props);
+
+		
+
+		Map<String,String> sm = new HashMap<>();
+		sm.put("city", "Oakland");
+		sm.put("state", "CA");
+		sm.put("mayor", "Libby Schaaf");
+		
+		getClient()
+				.execCypher(
+						"MERGE (mp:TestMultiProp {city:{city}}) set mp+={props} return mp",
+						"city", sm.get("city").toString(), "props", sm);
+
+		Assertions
+				.assertThat(
+						getClient()
+								.execCypher(
+										"match (mp:TestMultiProp {city:'San Francisco'}) return mp")
+								.toBlocking().first().get("mayor").asText())
+				.isEqualTo("Ed Lee");
+		
+		
+		Assertions
+		.assertThat(
+				getClient()
+						.execCypher(
+								"match (mp:TestMultiProp {city:'Oakland'}) return mp")
+						.toBlocking().first().get("mayor").asText())
+		.isEqualTo("Libby Schaaf");
+
 	}
 
 	@Test
