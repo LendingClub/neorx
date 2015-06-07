@@ -138,3 +138,10 @@ Now, let's parameterize the cypher quey:
   List<JsonNode> people = client
   .execCypherAsList("match (p:Person) where p.born>{year} return p","year",1980);
 ```
+
+Sometimes you want to be able to set properties in bulk without specifying them in cypher.  
+This will upsert the node and update the values of ```foo``` and ```bar```:
+```
+ObjectNode p = mapper.createObjectNode().put("foo","123").put("bar","456");
+client.execCypher("MERGE (x:Dummy {name: "something" }) set x += {props}","props",p); 
+```
