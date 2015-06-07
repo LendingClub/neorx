@@ -6,7 +6,7 @@ apply plugin: "jacoco"
 apply plugin: "signing"
 
 group 'io.macgyver.neorx'
-version = "1.0.8"
+version = "1.0.9-RC1"
 configurations {
 	//all*.exclude group: 'org.codehaus.groovy', module: 'groovy'
 	all*.exclude group: 'log4j'
@@ -40,7 +40,7 @@ dependencies {
 	testCompile "com.squareup.okhttp:mockwebserver:${OKHTTP_VERSION}"
 	testCompile "ch.qos.logback:logback-classic:${LOGBACK_VERSION}"
 	testCompile "org.slf4j:jul-to-slf4j:${SLF4J_VERSION}"
-
+	testCompile "com.google.guava:guava:18.0"  //  <<-- test scope only!
 }
 
 task wrapper(type: Wrapper) {

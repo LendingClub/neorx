@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.UUID;
 
 import io.macgyver.neorx.rest.NeoRxClient;
@@ -36,6 +37,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Splitter;
+import com.google.common.io.BaseEncoding;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 import com.squareup.okhttp.mockwebserver.rule.MockWebServerRule;
@@ -248,5 +251,23 @@ public class NeoRxClientTest extends NeoRxUnitTest {
 		Assertions.assertThat(
 				new NeoRxClient("http://localhost:7474", "user", "pass", true)
 						.isCeritificateValidationEnabled()).isTrue();
+	}
+	
+	@Test
+	public void testBasicAuth() throws InterruptedException {
+		String response = "{\"results\":[{\"columns\":[\"p\"],\"data\":[{\"row\":[{\"name\":\"Carrie-Anne Moss\",\"born\":1967}]}]}],\"errors\":[]}";
+
+		mockServer.enqueue(new MockResponse().setBody(response));
+		NeoRxClient c = new NeoRxClient(mockServer.getUrl("/").toString(), "scott", "tiger");
+		
+		c.execCypher("match (p:Foo) return p");
+		
+		RecordedRequest rr = mockServer.takeRequest();
+		
+		
+		List<String> l = Splitter.on(" ").splitToList(rr.getHeader("Authorization"));
+		
+		Assertions.assertThat(l.get(0)).isEqualTo("Basic");
+		Assertions.assertThat(new String(BaseEncoding.base64().decode(l.get(1)))).isEqualTo("scott:tiger");
 	}
 }
