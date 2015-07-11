@@ -1,7 +1,6 @@
 # NeoRx
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/if6was9/NeoRx?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Build Status](http://ci.macgyver.io/buildStatus/icon?job=neorx-ci)](http://ci.macgyver.io/job/neorx-ci/)
+[![Circle CI](https://circleci.com/gh/if6was9/NeoRx.svg?style=svg)](https://circleci.com/gh/if6was9/NeoRx)
 
 Neo4j REST Client implemented using:
 
