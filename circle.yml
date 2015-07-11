@@ -3,11 +3,14 @@ machine:
         version: oraclejdk7
     services:
         - neo4j
+    environment:
+        TERM: dumb
 
         
 general:
     artifacts:
         - "build/libs"
+        - "build/docs"
         
         
 test:
