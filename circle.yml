@@ -1,0 +1,13 @@
+machine:
+    java:
+        version: oraclejdk7
+    services:
+        - neo4j
+
+dependencies:
+    cache_directories:
+        - "~/.gradle"
+        
+general:
+    artifacts:
+        - "build"
