@@ -6,7 +6,7 @@ apply plugin: "jacoco"
 apply plugin: "signing"
 
 group 'io.macgyver.neorx'
-version = "1.0.9-RC1"
+version = "1.0.10"
 configurations {
 	//all*.exclude group: 'org.codehaus.groovy', module: 'groovy'
 	all*.exclude group: 'log4j'
@@ -67,17 +67,18 @@ uploadArchives {
         mavenDeployer {
 			
             name = 'macgyver-bintray'
-            if (!project.hasProperty('bintrayUser')) {
-                project.ext['bintrayUser']=""
-            }
-            if (!project.hasProperty('bintrayKey')) {
-                project.ext['bintrayKey']=""
-            }
+
+			if (!project.has('BINRAY_USER')) {
+				project.ext['BINTRAY_USER']=System.getenv("BINTRAY_USER")
+			}
+			if (!project.has('BINTRAY_KEY')) {
+				project.ext['BINTRAY_KEY'] = System.getenv("BINTRAY_KEY")
+			}
 			
 			beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 			
             repository(id: 'macgyver-bintray', url: 'https://api.bintray.com/maven/robschoening/io-macgyver/neorx'){
-                authentication(userName: bintrayUser, password: bintrayKey)
+                authentication(userName: BINTRAY_USER, password: BINTRAY_KEY)
 			}
             pom.project {
 				
@@ -112,9 +113,18 @@ signing {
 }
 
 signArchives.onlyIf { 
-	def signingPropertiesSet = project.ext.has('signing.keyId') 
+	
+	project.ext['signing.keyId'] = System.getenv("SIGNING_KEY_ID")
+	project.ext['signing.password'] = System.getenv("SIGNING_PASSWORD")
+	project.ext['signing.secretKeyRingFile'] = new File("./.gnupg/secring.gpg")
+	
+	def signingPropertiesSet = project.ext.has('signing.keyId') && project.ext['signing.keyId']
 	if (!signingPropertiesSet) {
 		println "properties required to sign artifacts not set -- disabling code signing"
+	}
+	else {
+		new File("./.gnupg").mkdirs()
+		ant.get(src: "https://robschoening.s3.amazonaws.com/macgyver/secring.gpg", dest: "./.gnupg/secring.gpg", verbose:true)
 	}
 	return signingPropertiesSet
 }
