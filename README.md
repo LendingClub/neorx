@@ -1,6 +1,6 @@
 # NeoRx
 
-[![Circle CI](https://circleci.com/gh/if6was9/NeoRx.svg?style=svg)](https://circleci.com/gh/if6was9/NeoRx)
+[![Circle CI](https://circleci.com/gh/if6was9/NeoRx.svg?style=svg)](https://circleci.com/gh/if6was9/neorx)
 
 Neo4j REST Client implemented using:
 
