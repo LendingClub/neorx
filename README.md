@@ -23,14 +23,14 @@ NeoRx is available from maven central:
 <dependency>
   <groupId>io.macgyver.neorx</groupId>
   <artifactId>neorx</artifactId>
-  <version>1.0.6</version>
+  <version>1.1.1</version>
 </dependency>
 ```
 
 or if you are lucky enough to be using Gradle:
 
 ```groovy
-compile "io.macgyver.neorx:neorx:1.0.6"
+compile "io.macgyver.neorx:neorx:1.1.1"
 ```
 
 
@@ -39,16 +39,16 @@ compile "io.macgyver.neorx:neorx:1.0.6"
 Instantiate the (thread-safe) client:
 ```java
 // to http://localhost:7474
-NeoRxClient client = new NeoRxClient(); 
+NeoRxClient client = new NeoRxClientBuilder().build(); 
 	
 // to https://neo4j.example.com:7473
-client = new NeoRxClient("https://neo4j.example.com:7473");
+client = new NeoRxClientBuilder.url("https://neo4j.example.com:7473").build();
 
 // to https://neo4j.example.com:7473 with certificate validation disabled
-client = new NeoRxClient("https://neo4j.example.com:7473",false);
+client = new NeoRxClientBuilder().url("https://neo4j.example.com:7473").withCertificateValidation(false).build();
 
 // with basic auth
-client = new NeoRxClient("http://localhost:7474","myusername","mypassword");
+client = new NeoRxClientBuilder().url("http://localhost:7474").credentials("myusername","mypassword").build();
 	
 ```
 
