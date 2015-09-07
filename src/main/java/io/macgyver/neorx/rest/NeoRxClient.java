@@ -261,8 +261,8 @@ public class NeoRxClient {
 			checkNotNull(c);
 			String requestId = newRequestId();
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("request[%s]: %s", requestId,
-						payloadString));
+				logger.debug(String.format("request[%s]:\n%s", requestId,
+						mapper.writerWithDefaultPrettyPrinter().writeValueAsString(payload)));
 			}
 			Builder builder = injectCredentials(new Request.Builder())
 					.addHeader("X-Stream", Boolean.toString(streamResponse))
@@ -282,9 +282,11 @@ public class NeoRxClient {
 
 			ObjectNode jsonResponse = (ObjectNode) mapper.readTree(r.body()
 					.charStream());
+			
+			
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("response[%s]: %s", requestId,
-						jsonResponse.toString()));
+				logger.debug(String.format("response[%s]:\n%s", requestId,
+						mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonResponse)));
 			}
 			ObjectNode n = jsonResponse;
 			JsonNode error = n.path("errors").path(0);

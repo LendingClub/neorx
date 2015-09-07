@@ -19,51 +19,61 @@ public class NeoRxClientBuilder {
 	
 	public static final boolean DEFAULT_CERT_VALIDATION = true;
 
-	String url = "http://localhost:7474";
-	String username;
-	String password;
+	
 	boolean validateCertificates = DEFAULT_CERT_VALIDATION;
 
 	Action1<OkHttpClient> configAction = null;
 
 	Logger logger = LoggerFactory.getLogger(NeoRxClientBuilder.class);
 
+	NeoRxClient neoRxClient = new NeoRxClient(this);
+	
 	public NeoRxClientBuilder() {
-
-	}
-
-	public NeoRxClientBuilder withUrl(String url) {
-		this.url = url;
-		return this;
-	}
-
-	public NeoRxClientBuilder withCredentials(String username, String password) {
-		this.username = username;
-		this.password = password;
-		return this;
-	}
-
-	public NeoRxClientBuilder withCertificateValidation() {
-		this.validateCertificates = true;
-		return this;
-	}
-
-	public void withClientConfig(Action1<OkHttpClient> c) {
-		this.configAction = c;
-	}
-
-	public NeoRxClient build() {
-		NeoRxClient c = new NeoRxClient(this);
-		c.username = username;
-		c.password = password;
-		c.validateCertificates = validateCertificates;
-		c.url = url;
-		OkHttpClient ok = c.getClient();
+		OkHttpClient ok = neoRxClient.getClient();
 
 		ok.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT_MILLIS,
 				TimeUnit.MILLISECONDS);
 		ok.setReadTimeout(DEFAULT_READ_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
 		ok.setWriteTimeout(DEFAULT_WRITE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+	}
+
+	public NeoRxClientBuilder withUrl(String url) {
+		assertState();
+		this.neoRxClient.url = url;
+		return this;
+	}
+
+	public NeoRxClientBuilder withCredentials(String username, String password) {
+		assertState();
+		neoRxClient.username = username;
+		neoRxClient.password = password;
+		return this;
+	}
+
+	public NeoRxClientBuilder withStats(boolean b) {
+		assertState();
+		neoRxClient.includeStats = b;
+		return this;
+	}
+	
+	public NeoRxClientBuilder withCertificateValidation(boolean b) {
+		assertState();
+		this.validateCertificates = b;
+		return this;
+	}
+
+	public NeoRxClientBuilder withClientConfig(Action1<OkHttpClient> c) {
+		assertState();
+		this.configAction = c;
+		return this;
+	}
+
+	public NeoRxClient build() {
+		assertState();
+		neoRxClient.validateCertificates = validateCertificates;
+		
+		OkHttpClient ok = neoRxClient.getClient();
+
 
 		
 		if (!validateCertificates) {
@@ -74,14 +84,23 @@ public class NeoRxClientBuilder {
 		}
 		
 		if (configAction != null) {
-			configAction.call(c.getClient());
+			configAction.call(ok);
 		}
 
-		logger.info("url: {}", url);
+		logger.info("url: {}", neoRxClient.getUrl());
 		logger.info("connectTimeout: {}ms", ok.getConnectTimeout());
 		logger.info("readTimeout: {}ms", ok.getReadTimeout());
 		logger.info("writeTimeout: {}ms", ok.getWriteTimeout());
 
-		return c;
+		NeoRxClient rval =  neoRxClient;
+		
+		neoRxClient = null; // reset state so that this can only be called once
+		
+		return rval;
+	}
+	protected void assertState() {
+		if (neoRxClient==null) {
+			throw new IllegalStateException("build() already invoked");
+		}
 	}
 }

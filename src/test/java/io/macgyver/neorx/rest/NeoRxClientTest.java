@@ -252,7 +252,7 @@ public class NeoRxClientTest extends NeoRxUnitTest {
 		String response = "{\"results\":[{\"columns\":[\"p\"],\"data\":[{\"row\":[{\"name\":\"Carrie-Anne Moss\",\"born\":1967}]}]}],\"errors\":[]}";
 
 		mockServer.enqueue(new MockResponse().setBody(response));
-		NeoRxClient c = new NeoRxClient(mockServer.getUrl("/").toString(), "scott", "tiger");
+		NeoRxClient c = new NeoRxClientBuilder().withUrl(mockServer.getUrl("/").toString()).withCredentials( "scott", "tiger").build();
 		
 		c.execCypher("match (p:Foo) return p");
 		
