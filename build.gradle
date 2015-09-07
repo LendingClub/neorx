@@ -124,7 +124,7 @@ signArchives.onlyIf {
 	}
 	else {
 		new File("./.gnupg").mkdirs()
-		ant.get(src: "https://robschoening.s3.amazonaws.com/macgyver/secring.gpg", dest: "./.gnupg/secring.gpg", verbose:true)
+		ant.get(src: "${System.getenv("SIGNING_KEYRING_URL")}", dest: "./.gnupg/secring.gpg", verbose:false)
 	}
 	return signingPropertiesSet
 }
