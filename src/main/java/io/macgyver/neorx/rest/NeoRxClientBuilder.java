@@ -38,12 +38,18 @@ public class NeoRxClientBuilder {
 	}
 
 	public NeoRxClientBuilder withUrl(String url) {
+		return url(url);
+	}
+	public NeoRxClientBuilder url(String url) {
 		assertState();
 		this.neoRxClient.url = url;
 		return this;
 	}
 
 	public NeoRxClientBuilder withCredentials(String username, String password) {
+		return credentials(username, password);
+	}
+	public NeoRxClientBuilder credentials(String username, String password) {
 		assertState();
 		neoRxClient.username = username;
 		neoRxClient.password = password;
