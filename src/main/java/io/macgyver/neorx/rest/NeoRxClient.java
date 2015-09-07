@@ -49,13 +49,15 @@ public class NeoRxClient {
 
 	public static final boolean CERTIFICATE_VALIDATION_DEFAULT = true;
 	public static final String DEFAULT_URL = "http://localhost:7474";
-	private String url = DEFAULT_URL;
-	private String username = null;
-	private String password = null;
-	private boolean validateCertificates = CERTIFICATE_VALIDATION_DEFAULT;
+	protected String url = DEFAULT_URL;
+	protected String username = null;
+	protected String password = null;
+	protected boolean validateCertificates = CERTIFICATE_VALIDATION_DEFAULT;
 	private boolean streamResponse = true;
 	final static ObjectMapper mapper = new ObjectMapper();
 	private volatile OkHttpClient httpClient = null;
+	boolean includeStats=true;
+	
 	Logger logger = LoggerFactory.getLogger(NeoRxClient.class);
 
 	private final Level REQUEST_RESPONSE_LEVEL = Level.FINE; // level at which
@@ -63,25 +65,48 @@ public class NeoRxClient {
 																// logging will
 																// be logged
 
+	protected NeoRxClient(NeoRxClientBuilder builder) {
+		
+		httpClient = new OkHttpClient();
+	}
+	
+	
+	/**
+	 * @deprecated use NeoRxClientBuilder instead
+	 */
+	@Deprecated
 	public NeoRxClient() {
 		this(DEFAULT_URL);
 	}
 
+	/**
+	 * @deprecated use NeoRxClientBuilder instead
+	 */
+	@Deprecated
 	public NeoRxClient(String url) {
 		this(url, null, null, CERTIFICATE_VALIDATION_DEFAULT);
 	}
-
+	/**
+	 * @deprecated use NeoRxClientBuilder instead
+	 */
+	@Deprecated
 	public NeoRxClient(String url, boolean validateCertificates) {
 		this(url, null, null, validateCertificates);
 	}
 
+	/**
+	 * @deprecated use NeoRxClientBuilder instead
+	 */
+	@Deprecated
 	public NeoRxClient(String url, String username, String password) {
 		this(url, username, password, CERTIFICATE_VALIDATION_DEFAULT);
 	}
 
+	@Deprecated
 	public NeoRxClient(String url, String username, String password,
 			boolean validateCertificates) {
 
+		logger.warn("NeoRxClient constructors are deprecated.  Please use https://github.com/if6was9/neorx/blob/master/src/main/java/io/macgyver/neorx/rest/NeoRxClientBuilder.java");
 		while (url.endsWith("/")) {
 			url = url.substring(0,url.length()-1);
 		}
@@ -102,6 +127,7 @@ public class NeoRxClient {
 		this.httpClient = client;
 	}
 
+	
 	protected OkHttpClient getClient() {
 
 		return httpClient;
@@ -214,6 +240,7 @@ public class NeoRxClient {
 
 		statement.put("statement", cypher);
 		statement.set("parameters", params);
+		statement.put("includeStats", includeStats);
 		statements.add(statement);
 		payload.set("statements", statements);
 		return payload;
@@ -295,10 +322,12 @@ public class NeoRxClient {
 	public boolean checkConnection() {
 		try {
 
+	
 			Response r = getClient().newCall(
 					injectCredentials(new Request.Builder()).url(
 							getUrl() + "/db/data/").build()).execute();
 
+			
 			if (r.isSuccessful()) {
 
 				r.body().close();

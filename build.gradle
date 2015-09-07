@@ -6,7 +6,7 @@ apply plugin: "jacoco"
 apply plugin: "signing"
 
 group 'io.macgyver.neorx'
-version = "1.0.10"
+version = "1.1.0"
 configurations {
 	//all*.exclude group: 'org.codehaus.groovy', module: 'groovy'
 	all*.exclude group: 'log4j'
@@ -34,7 +34,7 @@ dependencies {
 	compile "org.slf4j:slf4j-api:${SLF4J_VERSION}"
 	
 	
-	testCompile 'org.assertj:assertj-core:1.7.0'  
+	testCompile 'org.assertj:assertj-core:2.2.0'  
 	testCompile 'org.kohsuke:wordnet-random-name:1.2'  
 	testCompile "junit:junit:${JUNIT_VERSION}"
 	testCompile "com.squareup.okhttp:mockwebserver:${OKHTTP_VERSION}"
@@ -44,7 +44,7 @@ dependencies {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.4'
+    gradleVersion = '2.6'
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
