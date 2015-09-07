@@ -1,6 +1,7 @@
 # NeoRx
 
 [![Circle CI](https://circleci.com/gh/if6was9/neorx.svg?style=svg)](https://circleci.com/gh/if6was9/neorx)
+[ ![Download](https://api.bintray.com/packages/robschoening/io-macgyver/okrest/images/download.svg) ](https://bintray.com/robschoening/io-macgyver/okrest/_latestVersion)
 
 Neo4j REST Client implemented using:
 
