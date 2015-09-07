@@ -33,7 +33,8 @@ public abstract class AbstractIntegrationTest extends NeoRxUnitTest {
 	public synchronized NeoRxClient getClient() {
 
 		if (client == null) {
-			client = new NeoRxClient(getNeo4jRestUrl());
+			
+			client = new NeoRxClientBuilder().withUrl(getNeo4jRestUrl()).build();
 			MovieGraph g = new MovieGraph(client);
 			g.replaceMovieGraph();
 		}

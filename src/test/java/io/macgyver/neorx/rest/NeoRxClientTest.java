@@ -16,37 +16,28 @@ package io.macgyver.neorx.rest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
-import java.util.StringTokenizer;
 import java.util.UUID;
-
-import io.macgyver.neorx.rest.NeoRxClient;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
-import org.slf4j.bridge.SLF4JBridgeHandler;
-import org.slf4j.helpers.SubstituteLoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Splitter;
 import com.google.common.io.BaseEncoding;
 import com.squareup.okhttp.mockwebserver.MockResponse;
+import com.squareup.okhttp.mockwebserver.MockWebServer;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
-import com.squareup.okhttp.mockwebserver.rule.MockWebServerRule;
 
 public class NeoRxClientTest extends NeoRxUnitTest {
 
-	@Rule
-	public MockWebServerRule mockServer = new MockWebServerRule();
+	public MockWebServer mockServer = new MockWebServer();
 
 
 
@@ -211,13 +202,10 @@ public class NeoRxClientTest extends NeoRxUnitTest {
 
 	@Test
 	public void testCheckConnection() {
-		NeoRxClient c = new NeoRxClient() {
-			public String getUrl() {
-
-				return "http://invalid." + UUID.randomUUID().toString()
-						+ ".com";
-			}
-		};
+		NeoRxClient c = new NeoRxClientBuilder().withUrl("http://invalid." + UUID.randomUUID().toString()
+						+ ".com").build();
+			
+		
 		Assertions.assertThat(c.checkConnection()).isFalse();
 
 		c = new MockNeoRxClient() {
@@ -231,8 +219,14 @@ public class NeoRxClientTest extends NeoRxUnitTest {
 
 	@Test
 	public void testCertValidationDefaults() {
+		
+		Assertions.assertThat(
+				new NeoRxClientBuilder().build().isCeritificateValidationEnabled()).isTrue();
+		
 		Assertions.assertThat(
 				new NeoRxClient().isCeritificateValidationEnabled()).isTrue();
+		
+		
 		Assertions.assertThat(
 				new NeoRxClient("http://localhost:7474")
 						.isCeritificateValidationEnabled()).isTrue();
