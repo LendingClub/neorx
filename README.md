@@ -1,8 +1,7 @@
 # NeoRx
 
 [![Circle CI](https://circleci.com/gh/if6was9/neorx.svg?style=svg)](https://circleci.com/gh/if6was9/neorx)
-[ ![Download](https://api.bintray.com/packages/robschoening/io-macgyver/okrest/images/download.svg) ](https://bintray.com/robschoening/io-macgyver/okrest/_latestVersion)
-
+[![Download](https://img.shields.io/maven-central/v/io.macgyver.neorx/neorx.svg)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22neorx%22)
 Neo4j REST Client implemented using:
 
 [RxJava](https://github.com/ReactiveX/RxJava) - a powerful fluent API for processing results in a functional/reactive pattern
