@@ -23,14 +23,14 @@ NeoRx is available from maven central:
 <dependency>
   <groupId>io.macgyver.neorx</groupId>
   <artifactId>neorx</artifactId>
-  <version>1.1.1</version>
+  <version>1.2.0</version>
 </dependency>
 ```
 
 or if you are lucky enough to be using Gradle:
 
 ```groovy
-compile "io.macgyver.neorx:neorx:1.1.1"
+compile "io.macgyver.neorx:neorx:1.2.0"
 ```
 
 
