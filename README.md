@@ -145,3 +145,11 @@ This will upsert the node and update the values of ```foo``` and ```bar```:
 ObjectNode p = mapper.createObjectNode().put("foo","123").put("bar","456");
 client.execCypher("MERGE (x:Dummy {name: "something" }) set x += {props} return x","props",p); 
 ```
+
+## Changes
+
+### 1.2.0
+
+* upgrade to RxJava 1.1.0
+* upgrade to OkHttp 2.7.2
+* upgrade to Gradle 2.10
