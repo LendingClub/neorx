@@ -170,6 +170,19 @@ public class NeoRxClient {
 			else if (val instanceof ObjectNode) {
 				n.set(key, (ObjectNode) val);
 			}
+			else if (val instanceof ArrayNode) {
+				n.set(key, (ArrayNode)val);
+			}
+			else if (val instanceof JsonNode) {
+				JsonNode x = (JsonNode) val;
+				if (x.isValueNode()) {
+					n.set(key, x);
+				}
+				else {
+					throw new IllegalArgumentException("parameter '" + key
+							+ "' type not supported: " + val.getClass().getName());
+				}
+			}
 			else {
 				throw new IllegalArgumentException("parameter '" + key
 						+ "' type not supported: " + val.getClass().getName());

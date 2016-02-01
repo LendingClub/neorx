@@ -17,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
@@ -30,8 +31,12 @@ import org.junit.Test;
 import rx.functions.Action1;
 import rx.observables.BlockingObservable;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.NumericNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -279,5 +284,33 @@ public class NeoRxClientIntegrationTest extends AbstractIntegrationTest {
 		Assertions.assertThat(n.get(0).path("m.born").asInt()).isEqualTo(1967);
 		Assertions.assertThat(n.get(0).path("m.name").asText()).isEqualTo(
 				"Carrie-Anne Moss");
+	}
+	
+	@Test
+	public void testPrimitiveValues() throws JsonProcessingException, IOException {
+		ObjectMapper m = new ObjectMapper();
+		
+		JsonNode n = m.createObjectNode().set("xyz", NullNode.getInstance());
+		getClient().execCypher("create (a:JUnit) set a={p}, a.javaNull={javaNull},a.nullVal={nullVal}, a.intVal={intVal},a.stringVal={stringVal} return a","p",n,"stringVal",m.readTree("\"foo\""),"intVal",m.readTree("3"),"nullVal",NullNode.getInstance(),"javaNull",null);
+	}
+	
+	@Test
+	public void testArray() throws JsonProcessingException, IOException {
+		ObjectMapper m = new ObjectMapper();
+		
+		ArrayNode an = m.createArrayNode();		
+		an.add("foo");
+		an.add("bar");
+
+		ArrayNode an2 = m.createArrayNode();		
+		an2.add(1);
+		an2.add(2);
+		
+		JsonNode n = getClient().execCypher("create (a:JUnit) set a.array1={array1},a.array2={array2} return a","array1",an,"array2",an2).toBlocking().first();
+		
+		Assertions.assertThat(n.path("array1").get(0).asText()).isEqualTo("foo");
+		Assertions.assertThat(n.path("array1").get(1).asText()).isEqualTo("bar");
+		Assertions.assertThat(n.path("array2").get(0).asInt()).isEqualTo(1);
+		Assertions.assertThat(n.path("array2").get(1).asInt()).isEqualTo(2);
 	}
 }
