@@ -209,7 +209,7 @@ public class NeoRxClient {
 	}
 
 	/**
-	 * Convenience method for returning neo4j results as a List<JsonNode>. Same
+	 * Convenience method for returning neo4j results as a List. Same
 	 * as: client.execCypher(s,params).toList().toBlocking().first()
 	 * 
 	 * @param cypher
@@ -221,15 +221,15 @@ public class NeoRxClient {
 	}
 
 	/**
-	 * Convenience method for returning neo4j results as a List<JsonNode>. Same
+	 * Convenience method for returning neo4j results as a List. Same
 	 * as: client.execCypher(s,params).toList().toBlocking().first()
 	 * 
 	 * @param cypher
 	 * @param params
 	 * @return List of JsonNode
 	 */
-	public List<JsonNode> execCypherAsList(String cypher, ObjectNode n) {
-		return execCypher(cypher, n).toList().toBlocking().first();
+	public List<JsonNode> execCypherAsList(String cypher, ObjectNode params) {
+		return execCypher(cypher, params).toList().toBlocking().first();
 	}
 
 	public Observable<JsonNode> execCypher(String cypher, Object... params) {
