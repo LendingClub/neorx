@@ -204,7 +204,7 @@ public class NeoRxClientIntegrationTest extends AbstractIntegrationTest {
 
 	@Test
 	public void testInvalidUrl() {
-		NeoRxClient c = new NeoRxClient("http://blahblah.example.com");
+		NeoRxClient c = new NeoRxClientBuilder().url("http://blahblah.example.com").build();
 		try {
 			c.execCypher("match m");
 			Assertions.fail("should throw");
@@ -218,11 +218,16 @@ public class NeoRxClientIntegrationTest extends AbstractIntegrationTest {
 
 	@Test
 	public void testCertificateVerifiction() {
-		NeoRxClient c = new NeoRxClient("https://localhost:7473", false);
-		Assertions.assertThat(c.isCeritificateValidationEnabled()).isFalse();
+		NeoRxClient c = null;
+		
 
-		c = new NeoRxClient("https://localhost:7473", true);
-		Assertions.assertThat(c.isCeritificateValidationEnabled()).isTrue();
+		c = new NeoRxClientBuilder().url("https://localhost:7473").withCertificateValidation(true).build();
+		
+		
+		c= new NeoRxClientBuilder().url("https://localhost:7473").withCertificateValidation(false).build();
+	
+
+		
 	}
 
 	@Test
