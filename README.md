@@ -23,7 +23,7 @@ NeoRx is available from maven central:
 <dependency>
   <groupId>io.macgyver.neorx</groupId>
   <artifactId>neorx</artifactId>
-  <version>1.2.0</version>
+  <version>1.3.0</version>
 </dependency>
 ```
 
