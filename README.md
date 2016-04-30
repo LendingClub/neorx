@@ -30,7 +30,7 @@ NeoRx is available from maven central:
 or if you are lucky enough to be using Gradle:
 
 ```groovy
-compile "io.macgyver.neorx:neorx:1.2.0"
+compile "io.macgyver.neorx:neorx:1.3.0"
 ```
 
 
