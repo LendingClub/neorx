@@ -3,7 +3,6 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'maven'
 apply plugin: "jacoco"
-apply plugin: "signing"
 
 group 'io.macgyver.neorx'
 version = "1.3.0"
