@@ -1,8 +1,10 @@
 machine:
-    java:
-        version: oraclejdk7
+    pre:
+        - sudo ./neorx/tools/circle_setup.sh
     services:
         - neo4j
+    java:
+        version: oraclejdk8
     environment:
         TERM: dumb
 
