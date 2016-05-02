@@ -67,7 +67,8 @@ public class NeoRxClient {
 		
 	}
 	
-	protected OkHttpClient getClient() {
+
+	public OkHttpClient getOkHttpClient() {
 		return httpClient.get();
 	}
 
@@ -219,7 +220,7 @@ public class NeoRxClient {
 			ObjectNode payload = formatPayload(cypher, params);
 
 			String payloadString = payload.toString();
-			OkHttpClient c = getClient();
+			OkHttpClient c = getOkHttpClient();
 			checkNotNull(c);
 			String requestId = newRequestId();
 			if (logger.isDebugEnabled()) {
@@ -282,7 +283,7 @@ public class NeoRxClient {
 		try {
 
 	
-			Response r = getClient().newCall(
+			Response r = getOkHttpClient().newCall(
 					new Request.Builder().url(
 							getUrl() + "/db/data/").build()).execute();
 
