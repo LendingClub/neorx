@@ -215,6 +215,8 @@ public class NeoRxClient {
 
 	protected ObjectNode execRawCypher(String cypher, ObjectNode params) {
 
+		Response response = null;
+		
 		try {
 
 			ObjectNode payload = formatPayload(cypher, params);
@@ -236,10 +238,10 @@ public class NeoRxClient {
 
 
 
-			Response r = c.newCall(builder.build())
+			response = c.newCall(builder.build())
 					.execute();
 
-			ObjectNode jsonResponse = (ObjectNode) mapper.readTree(r.body()
+			ObjectNode jsonResponse = (ObjectNode) mapper.readTree(response.body()
 					.charStream());
 			
 			
@@ -259,6 +261,11 @@ public class NeoRxClient {
 
 		} catch (IOException e) {
 			throw new NeoRxException(e);
+		}
+		finally {
+			if (response!=null) {
+				response.body().close();
+			}
 		}
 	}
 

@@ -147,6 +147,13 @@ client.execCypher("MERGE (x:Dummy {name: "something" }) set x += {props} return 
 ```
 
 ## Changes
+### 1.3.4
+
+* properly close OkHttp response body
+* upgrade to RxJava 1.1.9
+* upgrade to Jackson 2.8.1
+* upgrade to OkHttp 3.4.1
+
 
 ### 1.2.0
 
