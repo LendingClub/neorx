@@ -67,10 +67,10 @@ uploadArchives {
 			
             name = 'macgyver-bintray'
 
-			if (!project.hasProperty('BINRAY_USER')) {
+			if (!project.ext.has('BINRAY_USER')) {
 				project.ext['BINTRAY_USER']=System.getenv("BINTRAY_USER")
 			}
-			if (!project.hasProperty('BINTRAY_KEY')) {
+			if (!project.ext.has('BINTRAY_KEY')) {
 				project.ext['BINTRAY_KEY'] = System.getenv("BINTRAY_KEY")
 			}
 			
