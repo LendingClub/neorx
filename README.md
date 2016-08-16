@@ -2,6 +2,8 @@
 
 [![Circle CI](https://circleci.com/gh/LendingClub/neorx.svg?style=svg)](https://circleci.com/gh/LendingClub/neorx)
 [![Download](https://img.shields.io/maven-central/v/io.macgyver.neorx/neorx.svg)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22neorx%22)
+[ ![Download](https://api.bintray.com/packages/robschoening/io-macgyver/neorx/images/download.svg) ](https://bintray.com/robschoening/io-macgyver/neorx/_latestVersion)
+
 Neo4j REST Client implemented using:
 
 [RxJava](https://github.com/ReactiveX/RxJava) - a powerful fluent API for processing results in a functional/reactive pattern
@@ -23,14 +25,14 @@ NeoRx is available from maven central:
 <dependency>
   <groupId>io.macgyver.neorx</groupId>
   <artifactId>neorx</artifactId>
-  <version>1.3.0</version>
+  <version>1.3.4</version>
 </dependency>
 ```
 
 or if you are lucky enough to be using Gradle:
 
 ```groovy
-compile "io.macgyver.neorx:neorx:1.3.0"
+compile "io.macgyver.neorx:neorx:1.3.4"
 ```
 
 
