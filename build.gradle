@@ -4,8 +4,8 @@ apply plugin: 'idea'
 apply plugin: 'maven'
 apply plugin: "jacoco"
 
-group 'io.macgyver.neorx'
-version = "1.3.5"
+group 'org.lendingclub.neorx'
+version = "2.0.0"
 configurations {
 	//all*.exclude group: 'org.codehaus.groovy', module: 'groovy'
 	all*.exclude group: 'log4j'
@@ -27,23 +27,22 @@ targetCompatibility = 1.8
 dependencies {
 
 
-	compile "io.reactivex:rxjava:${RXJAVA_VERSION}"
-	compile "com.fasterxml.jackson.core:jackson-databind:${JACKSON_VERSION}"
-	compile "com.squareup.okhttp3:okhttp:${OKHTTP_VERSION}"
+	compile "io.reactivex.rxjava2:rxjava:${RXJAVA_VERSION}"
 	compile "org.slf4j:slf4j-api:${SLF4J_VERSION}"
-	
+	compile "org.neo4j.driver:neo4j-java-driver:$NEO4J_DRIVER_VERSION"
+	compile "com.fasterxml.jackson.core:jackson-databind:${JACKSON_VERSION}"
 	
 	testCompile 'org.assertj:assertj-core:2.2.0'  
 	testCompile 'org.kohsuke:wordnet-random-name:1.2'  
 	testCompile "junit:junit:${JUNIT_VERSION}"
-	testCompile "com.squareup.okhttp3:mockwebserver:${OKHTTP_VERSION}"
+	
 	testCompile "ch.qos.logback:logback-classic:${LOGBACK_VERSION}"
 	testCompile "org.slf4j:jul-to-slf4j:${SLF4J_VERSION}"
 	testCompile "com.google.guava:guava:18.0"  //  <<-- test scope only!
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.3'
+    gradleVersion = '3.4.1'
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -120,6 +119,4 @@ jacocoTestReport {
     additionalSourceDirs = files(sourceSets.main.allJava.srcDirs)
 }
 
-task (none) << {
-	// dummy task to do nothing
-}
+
