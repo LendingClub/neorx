@@ -73,7 +73,7 @@ uploadArchives {
 				project.ext['BINTRAY_KEY'] = System.getenv("BINTRAY_KEY")
 			}
 			
-            repository(id: 'macgyver-bintray', url: 'https://api.bintray.com/maven/lendingclub/OSS/neorx'){
+            repository(id: 'macgyver-bintray', url: 'https://api.bintray.com/maven/lendingclub/OSS/NeoRx'){
                 authentication(userName: BINTRAY_USER, password: BINTRAY_KEY)
 			}
             pom.project {
