@@ -1,63 +1,39 @@
 # NeoRx
 
 [![Circle CI](https://circleci.com/gh/LendingClub/neorx.svg?style=svg)](https://circleci.com/gh/LendingClub/neorx)
-[![Download](https://img.shields.io/maven-central/v/io.macgyver.neorx/neorx.svg)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22neorx%22)
-[ ![Download](https://api.bintray.com/packages/robschoening/io-macgyver/neorx/images/download.svg) ](https://bintray.com/robschoening/io-macgyver/neorx/_latestVersion)
+[ ![Download](https://api.bintray.com/packages/lendingclub/OSS/NeoRx/images/download.svg) ](https://bintray.com/lendingclub/OSS/NeoRx/_latestVersion)
 
-Neo4j REST Client implemented using:
+NeoRx is a Neo4j client implemented using the Neo4j BOLT driver.  The goal is to provide a simple,fluent, json-native API that focuses on ease-of-use.
+
+The underlying implementation is based on:
+
+[neo4j-java-driver](https://github.com/neo4j/neo4j-java-driver) - Neo4j's Java Driver
 
 [RxJava](https://github.com/ReactiveX/RxJava) - a powerful fluent API for processing results in a functional/reactive pattern
 
 [Jackson](https://github.com/FasterXML/jackson) - the most fluent Java API for processing JSON 
 
-[OkHttp](http://square.github.io/okhttp/) - a fluent HTTP client
-
-The Neo4J Cypher REST API combines the power of the Cypher query language with a JSON-native API that is very easy to process. 
-
 The examples below should make this very clear.
 
-## Obtaining
-
-
-NeoRx is available from maven central:
-
-```xml
-<dependency>
-  <groupId>io.macgyver.neorx</groupId>
-  <artifactId>neorx</artifactId>
-  <version>1.3.4</version>
-</dependency>
-```
-
-or if you are lucky enough to be using Gradle:
-
-```groovy
-compile "io.macgyver.neorx:neorx:1.3.4"
-```
 
 
 ## Recipes
 
 Instantiate the (thread-safe) client:
 ```java
-// to http://localhost:7474
-NeoRxClient client = new NeoRxClientBuilder().build(); 
-	
-// to https://neo4j.example.com:7473
-client = new NeoRxClientBuilder.url("https://neo4j.example.com:7473").build();
-
-// to https://neo4j.example.com:7473 with certificate validation disabled
-client = new NeoRxClientBuilder().url("https://neo4j.example.com:7473").withCertificateValidation(false).build();
-
-// with basic auth
-client = new NeoRxClientBuilder().url("http://localhost:7474").credentials("myusername","mypassword").build();
-	
+// to bolt://localhost:7687
+NeoRxClient client = new NeoRxClient.Builder().build();
+    
+// to bolt://neo4j.example.com:7687
+NeoRxClient client = new NeoRxClient.Builder()
+  .withUrl("bolt://neo4j.example.com:7686")
+  .build(); 
 ```
 
 Find all of the people in the graph who are born after 1980 and print the results using a Java 8 Lambda:
 ```java
 client.execCypher("match (p:Person) where p.born>1980 return p")
-	.subscribe(it -> System.out.println(it));
+  .subscribe(it -> System.out.println(it));
 
 Output:
 
@@ -69,11 +45,11 @@ Output:
 
 Same query, but print just the name:
 ```java
-	client.execCypher("match (p:Person) where p.born>1960 return p")
-	  .subscribe(
-	  	it -> System.out.println(it.path("name").asText()
-	  	);
-	
+client.execCypher("match (p:Person) where p.born>1960 return p")
+  .subscribe(
+    it -> System.out.println(it.path("name").asText()
+  );
+    
 Output:
 
 Jonathan Lipnicki
@@ -85,10 +61,10 @@ Rain
 And now return the attributes individually:
 ```java
 client.execCypher("match (p:Person) where p.born>1980 return p.name, p.born")
-	.subscribe(
-		it -> System.out.println(it.path("p.name").asText()+" - "+it.path("p.born").asInt())
-	);
-	
+  .subscribe(
+    it -> System.out.println(it.path("p.name").asText()+" - "+it.path("p.born").asInt())
+  );
+    
 Output:
 
 Jonathan Lipnicki - 1990
@@ -99,41 +75,28 @@ Rain - 1982
 If you are stuck with Java 7:
 
 ```java
-neoRxClient.execCypher("match (p:Person) where p.born>1980 return p")
-.subscribe(
-	new Action1<JsonNode>() {
-
-		@Override
-		public void call(JsonNode t1) {
-			System.out.println("Name: "+t1.path("name").asText();
-		}
-	});
+client.execCypher("match (p:Person) where p.born>1980 return p").subscribe(new Consumer<JsonNode>() {
+  public void accept(JsonNode it) throws Exception {
+    System.out.println(it.path("p.name").asText() + " - " + it.path("p.born").asInt());
+  }
+});
 ```
 
 
 If you just want a list:
 ```
-List<JsonNode> people = client.execCypher("match (p:Person) where p.born>1980 return p")
-	.toList()
-	.toBlocking()
-	.first();
+List<JsonNode> people = 
+  client.execCypher("match (p:Person) where p.born>1980 return p")
+  .toList()
+  .blockingGet();
 ```
 
 And the same operation, through a convenience method:
 ```
 List<JsonNode> people = client
-	.execCypherAsList("match (p:Person) where p.born>1980 return p");
-```		  
+  .execCypherAsList("match (p:Person) where p.born>1980 return p");
+```       
 
-This example shows the use of an Rx function to transform the result from JsonNode to String:
-
-```java
-List<String> names = neoRxClient
-	.execCypher("match (p:Person) where p.born>1980 return p.name")
-	.flatMap(NeoRxFunctions.jsonNodeToString())
-	.toList()
-	.toBlocking().first();
-```
 
 Now, let's parameterize the cypher quey:
 ```
@@ -148,7 +111,33 @@ ObjectNode p = mapper.createObjectNode().put("foo","123").put("bar","456");
 client.execCypher("MERGE (x:Dummy {name: "something" }) set x += {props} return x","props",p); 
 ```
 
+## Obtaining
+
+
+NeoRx is available from maven central:
+
+```xml
+<dependency>
+  <groupId>org.lendingclub.neorx</groupId>
+  <artifactId>neorx</artifactId>
+  <version>2.0.0</version>
+</dependency>
+```
+
+or with Gradle:
+
+```groovy
+compile "org.lendinglcub.neorx:neorx:2.0.0"
+```
+
+
 ## Changes
+
+### 2.0.0
+* swtich from REST to BOLT protocol
+* RxJava 2.x
+* package rename from io.macgyver.neorx to org.lendingclub.neorx
+
 ### 1.3.4
 
 * properly close OkHttp response body

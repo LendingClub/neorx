@@ -1,12 +1,11 @@
-package io.macgyver.neorx.rest.impl;
-
-import io.macgyver.neorx.rest.NeoRxUnitTest;
+package org.lendingclub.neorx;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Assert;
 import org.junit.Test;
 
-public class GuavePreconditionsTest extends NeoRxUnitTest {
+import junit.framework.Assert;
+
+public class GuavaPreconditionsTest  {
 
 	@Test
 	public void testPositive() {
@@ -20,20 +19,20 @@ public class GuavePreconditionsTest extends NeoRxUnitTest {
 	public void testNegative() {
 		try {
 			GuavaPreconditions.checkNotNull(null);
-			Assert.fail();
+			org.junit.Assert.fail();
 		} catch (Exception e) {
 			Assertions.assertThat(e).isInstanceOf(NullPointerException.class);
 		}
 		
 		try {
 			GuavaPreconditions.checkNotNull(null,"123 abcdef 456");
-			Assert.fail();
+			org.junit.Assert.fail();
 		} catch (Exception e) {
 			Assertions.assertThat(e).isInstanceOf(NullPointerException.class).hasMessageContaining("abcdef");
 		}
 		try {
 			GuavaPreconditions.checkArgument(false);
-			Assert.fail();
+			org.junit.Assert.fail();
 		} catch (Exception e) {
 			Assertions.assertThat(e).isInstanceOf(IllegalArgumentException.class);
 		}

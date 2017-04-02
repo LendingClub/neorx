@@ -1,10 +1,10 @@
-package io.macgyver.neorx.rest.impl;
+package org.lendingclub.neorx;
 
 /**
  * Copied from Guava
  *
  */
-public class GuavaStrings {
+class GuavaStrings {
 
 	
 	  /**

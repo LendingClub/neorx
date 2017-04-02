@@ -1,6 +1,4 @@
-package io.macgyver.neorx.rest;
-
-import io.macgyver.neorx.rest.impl.GuavaPreconditions;
+package org.lendingclub.neorx;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,22 +6,18 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.net.URL;
 
+import org.lendingclub.neorx.NeoRxClient;
+
+import com.google.common.base.Preconditions;
+
 public class MovieGraph {
 
 	NeoRxClient client;
 
-	public static void main(String[] args) throws IOException {
 
-		NeoRxClient c = new NeoRxClient();
-
-		MovieGraph mg = new MovieGraph(c);
-
-		mg.replaceMovieGraph();
-
-	}
 
 	public MovieGraph(NeoRxClient c) {
-		GuavaPreconditions.checkNotNull(c);
+		Preconditions.checkNotNull(c);
 		this.client = c;
 	}
 
@@ -62,5 +56,4 @@ public class MovieGraph {
 		client.execCypher(val);
 
 	}
-
 }
