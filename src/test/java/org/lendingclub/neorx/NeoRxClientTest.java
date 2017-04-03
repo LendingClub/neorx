@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static org.lendingclub.neorx.NeoRxBoltClientImpl.convertValueType;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.NumericNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -455,5 +457,60 @@ public class NeoRxClientTest {
 	@Test
 	public void testDriver() {
 		Assertions.assertThat(getClient().getDriver()).isNotNull();
+	}
+	
+	@Test
+	public void testJsonNodeParam() throws IOException, JsonProcessingException{
+		Assertions.assertThat(getClient().execCypher("match (m:Movie {title:{title}}) return m","title","Unforgiven").toList().blockingGet()).hasSize(1);
+		Assertions.assertThat(getClient().execCypher("match (m:Movie {title:{title}}) return m","title",mapper.readTree("\"Unforgiven\"")).toList().blockingGet()).hasSize(1);
+
+
+		Assertions.assertThat(getClient().execCypher("match (m:Movie {released:{year}}) return m","year",1992).toList().blockingGet()).hasSize(4);
+		Assertions.assertThat(getClient().execCypher("match (m:Movie {released:{year}}) return m","year",mapper.readTree("1992")).toList().blockingGet()).hasSize(4);
+
+
+		Assertions.assertThat(getClient().execCypher("match (m:Movie) where m.released<{year} return m","year", 1976.2).toList().blockingGet().size()).isEqualTo(2);
+		Assertions.assertThat(getClient().execCypher("match (m:Movie) where m.released<{year} return m","year", mapper.readTree("1976.2")).toList().blockingGet().size()).isEqualTo(2);
+		
+		String id = UUID.randomUUID().toString();
+		getClient().execCypher("create (f:JUnitFoo {id:{id}, active:{active}}) return f","id",id,"active",true);
+		
+		Assertions.assertThat(getClient().execCypher("match (f:JUnitFoo {id:{id},active:{active}}) return f","id",id,"active",false).toList().blockingGet()).hasSize(0);
+		Assertions.assertThat(getClient().execCypher("match (f:JUnitFoo {id:{id},active:{active}}) return f","id",id,"active",true).toList().blockingGet()).hasSize(1);
+		Assertions.assertThat(getClient().execCypher("match (f:JUnitFoo {id:{id},active:{active}}) return f","id",id,"active",mapper.readTree("false")).toList().blockingGet()).hasSize(0);
+		Assertions.assertThat(getClient().execCypher("match (f:JUnitFoo {id:{id},active:{active}}) return f","id",id,"active",mapper.readTree("true")).toList().blockingGet()).hasSize(1);
+
+	
+	}
+	
+	@Test
+	public void testNullValue() throws IOException, JsonProcessingException{
+		
+		
+		String id = UUID.randomUUID().toString();
+		getClient().execCypher("create (f:JUnitFoo {id:{id}, val:{val}, fizz:null}) set f.foo=null return f","id",id,"val",mapper.createObjectNode().path("notfound"));
+		
+		JsonNode n = getClient().execCypher("match (f:JUnitFoo {id:{id}}) return f","id",id).blockingFirst();
+		System.out.println(n);
+		Assertions.assertThat(Lists.newArrayList(n.fieldNames())).hasSize(1);
+		
+	
+	
+	}
+	
+	@Test
+	public void testConvertValueType() throws IOException, JsonProcessingException {
+		Assertions.assertThat(NeoRxBoltClientImpl.convertValueType(null)).isNull();
+		Assertions.assertThat(NeoRxBoltClientImpl.convertValueType("123")).isEqualTo("123");
+		Assertions.assertThat(NeoRxBoltClientImpl.convertValueType(123)).isEqualTo(123);
+		Assertions.assertThat(NeoRxBoltClientImpl.convertValueType(this)).isSameAs(this);
+		Assertions.assertThat(NeoRxBoltClientImpl.convertValueType(mapper.createArrayNode().add("a"))).isInstanceOf(List.class);
+		Assertions.assertThat(NeoRxBoltClientImpl.convertValueType(mapper.createArrayNode().add(1).add(2))).isInstanceOf(List.class);
+		Assertions.assertThat(NeoRxBoltClientImpl.convertValueType(mapper.createObjectNode())).isInstanceOf(Map.class);
+		Assertions.assertThat(NeoRxBoltClientImpl.convertValueType(mapper.createObjectNode().path("foo"))).isNull();
+		Assertions.assertThat(NeoRxBoltClientImpl.convertValueType(NullNode.getInstance())).isNull();
+		Assertions.assertThat(NeoRxBoltClientImpl.convertValueType(MissingNode.getInstance())).isNull();
+		Assertions.assertThat(NeoRxBoltClientImpl.convertValueType(mapper.readTree("123"))).isEqualTo(123);
+		Assertions.assertThat(NeoRxBoltClientImpl.convertValueType(mapper.readTree("123.45"))).isEqualTo(123.45);
 	}
 }

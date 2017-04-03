@@ -19,8 +19,17 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.DecimalNode;
+import com.fasterxml.jackson.databind.node.DoubleNode;
+import com.fasterxml.jackson.databind.node.FloatNode;
+import com.fasterxml.jackson.databind.node.IntNode;
+import com.fasterxml.jackson.databind.node.LongNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.databind.node.ValueNode;
 
 import io.reactivex.Observable;
 
@@ -99,26 +108,57 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 	}
 
 	static Object convertValueType(Object input) {
+		Object rval = input;
 		if (input == null) {
-			return input;
-		}
-		if (input instanceof ObjectNode) {
-			return mapper.convertValue(input, Map.class);
-		}
-		if (input instanceof ArrayNode) {
-			return mapper.convertValue(input, List.class);
+			rval = null; // unnecessary, but clear
+		} else if (input.getClass().isPrimitive()) {
+			rval = input;
+		} else if (input instanceof String) {
+			rval = input;
+		} else if (input instanceof ObjectNode) {
+			rval = mapper.convertValue(input, Map.class);
+		} else if (input instanceof ArrayNode) {
+			rval = mapper.convertValue(input, List.class);
+		} else if (input instanceof MissingNode) {
+			rval = null;
+		} else if (input instanceof NullNode) {
+			rval = null;
+		} else if (input instanceof ValueNode) {
+			ValueNode vn = ValueNode.class.cast(input);
+
+			if (vn.isTextual()) {
+				rval = TextNode.class.cast(input).asText();
+			} else if (vn.isLong()) {
+				rval = vn.asLong();
+			} else if (vn.isInt()) {
+				rval = vn.asInt();
+			}
+
+			else if (vn.isBoolean()) {
+				rval = vn.booleanValue();
+			} else if (vn.isDouble()) {
+				rval = vn.asDouble();
+			} else if (vn.isInt()) {
+				rval = vn.asInt();
+			}
 		}
 
-		return input;
+		if (logger.isDebugEnabled()) {
+			logger.debug("convert <<{}>> ({}) to <<{}>> ({})", input, input == null ? "null" : input.getClass(), rval,
+					rval == null ? "null" : rval.getClass());
+		}
+		return rval;
 	}
 
 	protected static Object[] convertExtraTypes(Object... keysAndValues) {
 		if (keysAndValues.length % 2 != 0) {
-			// we throw the same client exception as the underlying Driver would, but wrap it for consistency with 
+			// we throw the same client exception as the underlying Driver
+			// would, but wrap it for consistency with
 			// NeoRx exception hierarchy.
-			
-			throw new NeoRxException( new ClientException("Parameters function requires an even number " + "of arguments, "
-					+ "alternating key and value. Arguments were: " + Arrays.toString(keysAndValues) + "."));
+
+			throw new NeoRxException(
+					new ClientException("Parameters function requires an even number " + "of arguments, "
+							+ "alternating key and value. Arguments were: " + Arrays.toString(keysAndValues) + "."));
 		}
 		for (int i = 0; i < keysAndValues.length; i += 2) {
 			keysAndValues[i + 1] = convertValueType(keysAndValues[i + 1]);
@@ -147,11 +187,15 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 			if (logger.isDebugEnabled()) {
 				logger.debug("cypher={}", cypher);
 			}
-		
+
 			StatementResult result = session.run(cypher, parameters(convertExtraTypes(args)));
-			// This is inefficient to take the result, turn it into a list and then back into an Observable.
-			// We will enhance this to stream the statement result as an Observable directly
+			// This is inefficient to take the result, turn it into a list and
+			// then back into an Observable.
+			// We will enhance this to stream the statement result as an
+			// Observable directly
 			return Observable.fromIterable(toList(result));
+		} catch (ClientException e) {
+			throw new NeoRxException(e.getMessage(), e);
 		} finally {
 			session.close();
 		}
@@ -166,8 +210,7 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 		try {
 			execCypher("match (a:Check__Session) return count(a)");
 			return true;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			return false;
 		}
 	}
