@@ -45,7 +45,7 @@ public class NeoRxClientTest {
 	static NeoRxBoltClientImpl client;
 
 	@After
-	public  void tearDown() {
+	public void tearDown() {
 		if (client == null) {
 			return;
 		}
@@ -65,33 +65,30 @@ public class NeoRxClientTest {
 
 		});
 	}
-	
 
-		
-	@AfterClass 
+	@AfterClass
 	public static void tearDownMovieGraph() {
-		client.execCypher("match (p:Person) detach delete p");
-		client.execCypher("match (p:Movie) detach delete p");
+		if (client != null) {
+			client.execCypher("match (p:Person) detach delete p");
+			client.execCypher("match (p:Movie) detach delete p");
+		}
 	}
-	
 
 	@BeforeClass
 	public static void setup() {
-	
 
-			NeoRxClient c = new NeoRxClient.Builder().withConfig(Config.build().withLeakedSessionsLogging().toConfig())
-					.build();
-			
-			if (!c.checkConnection()) {
-				logger.warn("neo4j unavailable for testing");
-				return;
-			}
-			
-			client = (NeoRxBoltClientImpl) c;
+		NeoRxClient c = new NeoRxClient.Builder().withConfig(Config.build().withLeakedSessionsLogging().toConfig())
+				.build();
 
-			MovieGraph mg = new MovieGraph(c);
-			mg.replaceMovieGraph();
-		
+		if (!c.checkConnection()) {
+			logger.warn("neo4j unavailable for testing");
+			return;
+		}
+
+		client = (NeoRxBoltClientImpl) c;
+
+		MovieGraph mg = new MovieGraph(c);
+		mg.replaceMovieGraph();
 
 	}
 
@@ -157,7 +154,8 @@ public class NeoRxClientTest {
 		Assertions.assertThat(convertParameterValueType(new String[0])).isInstanceOf(String[].class);
 		Assertions.assertThat(convertParameterValueType("foo")).isEqualTo("foo");
 		Assertions.assertThat(convertParameterValueType(this)).isSameAs(this);
-		Assertions.assertThat(convertParameterValueType(mapper.createObjectNode().put("foo", "bar"))).isInstanceOf(Map.class);
+		Assertions.assertThat(convertParameterValueType(mapper.createObjectNode().put("foo", "bar")))
+				.isInstanceOf(Map.class);
 
 		Map<String, Object> m = (Map<String, Object>) convertParameterValueType(
 				mapper.createObjectNode().set("foo", mapper.createArrayNode().add("fizz").add("buzz")));
@@ -459,79 +457,93 @@ public class NeoRxClientTest {
 					.hasCauseInstanceOf(ClientException.class);
 		}
 	}
+
 	@Test
 	public void testDriver() {
 		Assertions.assertThat(getClient().getDriver()).isNotNull();
 	}
-	
+
 	@Test
-	public void testJsonNodeParam() throws IOException, JsonProcessingException{
-		Assertions.assertThat(getClient().execCypher("match (m:Movie {title:{title}}) return m","title","Unforgiven").toList().blockingGet()).hasSize(1);
-		Assertions.assertThat(getClient().execCypher("match (m:Movie {title:{title}}) return m","title",mapper.readTree("\"Unforgiven\"")).toList().blockingGet()).hasSize(1);
+	public void testJsonNodeParam() throws IOException, JsonProcessingException {
+		Assertions.assertThat(getClient().execCypher("match (m:Movie {title:{title}}) return m", "title", "Unforgiven")
+				.toList().blockingGet()).hasSize(1);
+		Assertions.assertThat(getClient()
+				.execCypher("match (m:Movie {title:{title}}) return m", "title", mapper.readTree("\"Unforgiven\""))
+				.toList().blockingGet()).hasSize(1);
 
+		Assertions.assertThat(getClient().execCypher("match (m:Movie {released:{year}}) return m", "year", 1992)
+				.toList().blockingGet()).hasSize(4);
+		Assertions.assertThat(
+				getClient().execCypher("match (m:Movie {released:{year}}) return m", "year", mapper.readTree("1992"))
+						.toList().blockingGet())
+				.hasSize(4);
 
-		Assertions.assertThat(getClient().execCypher("match (m:Movie {released:{year}}) return m","year",1992).toList().blockingGet()).hasSize(4);
-		Assertions.assertThat(getClient().execCypher("match (m:Movie {released:{year}}) return m","year",mapper.readTree("1992")).toList().blockingGet()).hasSize(4);
+		Assertions.assertThat(getClient().execCypher("match (m:Movie) where m.released<{year} return m", "year", 1976.2)
+				.toList().blockingGet().size()).isEqualTo(2);
+		Assertions.assertThat(getClient()
+				.execCypher("match (m:Movie) where m.released<{year} return m", "year", mapper.readTree("1976.2"))
+				.toList().blockingGet().size()).isEqualTo(2);
 
-
-		Assertions.assertThat(getClient().execCypher("match (m:Movie) where m.released<{year} return m","year", 1976.2).toList().blockingGet().size()).isEqualTo(2);
-		Assertions.assertThat(getClient().execCypher("match (m:Movie) where m.released<{year} return m","year", mapper.readTree("1976.2")).toList().blockingGet().size()).isEqualTo(2);
-		
 		String id = UUID.randomUUID().toString();
-		getClient().execCypher("create (f:JUnitFoo {id:{id}, active:{active}}) return f","id",id,"active",true);
-		
-		Assertions.assertThat(getClient().execCypher("match (f:JUnitFoo {id:{id},active:{active}}) return f","id",id,"active",false).toList().blockingGet()).hasSize(0);
-		Assertions.assertThat(getClient().execCypher("match (f:JUnitFoo {id:{id},active:{active}}) return f","id",id,"active",true).toList().blockingGet()).hasSize(1);
-		Assertions.assertThat(getClient().execCypher("match (f:JUnitFoo {id:{id},active:{active}}) return f","id",id,"active",mapper.readTree("false")).toList().blockingGet()).hasSize(0);
-		Assertions.assertThat(getClient().execCypher("match (f:JUnitFoo {id:{id},active:{active}}) return f","id",id,"active",mapper.readTree("true")).toList().blockingGet()).hasSize(1);
+		getClient().execCypher("create (f:JUnitFoo {id:{id}, active:{active}}) return f", "id", id, "active", true);
 
-	
+		Assertions.assertThat(getClient()
+				.execCypher("match (f:JUnitFoo {id:{id},active:{active}}) return f", "id", id, "active", false).toList()
+				.blockingGet()).hasSize(0);
+		Assertions.assertThat(getClient()
+				.execCypher("match (f:JUnitFoo {id:{id},active:{active}}) return f", "id", id, "active", true).toList()
+				.blockingGet()).hasSize(1);
+		Assertions.assertThat(getClient().execCypher("match (f:JUnitFoo {id:{id},active:{active}}) return f", "id", id,
+				"active", mapper.readTree("false")).toList().blockingGet()).hasSize(0);
+		Assertions.assertThat(getClient().execCypher("match (f:JUnitFoo {id:{id},active:{active}}) return f", "id", id,
+				"active", mapper.readTree("true")).toList().blockingGet()).hasSize(1);
+
 	}
-	
+
 	@Test
-	public void testNullValue() throws IOException, JsonProcessingException{
-		
-		
+	public void testNullValue() throws IOException, JsonProcessingException {
+
 		String id = UUID.randomUUID().toString();
-		getClient().execCypher("create (f:JUnitFoo {id:{id}, val:{val}, fizz:null}) set f.foo=null return f","id",id,"val",mapper.createObjectNode().path("notfound"));
-		
-		JsonNode n = getClient().execCypher("match (f:JUnitFoo {id:{id}}) return f","id",id).blockingFirst();
+		getClient().execCypher("create (f:JUnitFoo {id:{id}, val:{val}, fizz:null}) set f.foo=null return f", "id", id,
+				"val", mapper.createObjectNode().path("notfound"));
+
+		JsonNode n = getClient().execCypher("match (f:JUnitFoo {id:{id}}) return f", "id", id).blockingFirst();
 		System.out.println(n);
 		Assertions.assertThat(Lists.newArrayList(n.fieldNames())).hasSize(1);
-		
-	
-	
+
 	}
-	
+
 	@Test
 	public void testConvertValueType() throws IOException, JsonProcessingException {
 		Assertions.assertThat(NeoRxBoltClientImpl.convertParameterValueType(null)).isNull();
 		Assertions.assertThat(NeoRxBoltClientImpl.convertParameterValueType("123")).isEqualTo("123");
 		Assertions.assertThat(NeoRxBoltClientImpl.convertParameterValueType(123)).isEqualTo(123);
 		Assertions.assertThat(NeoRxBoltClientImpl.convertParameterValueType(this)).isSameAs(this);
-		Assertions.assertThat(NeoRxBoltClientImpl.convertParameterValueType(mapper.createArrayNode().add("a"))).isInstanceOf(List.class);
-		Assertions.assertThat(NeoRxBoltClientImpl.convertParameterValueType(mapper.createArrayNode().add(1).add(2))).isInstanceOf(List.class);
-		Assertions.assertThat(NeoRxBoltClientImpl.convertParameterValueType(mapper.createObjectNode())).isInstanceOf(Map.class);
-		Assertions.assertThat(NeoRxBoltClientImpl.convertParameterValueType(mapper.createObjectNode().path("foo"))).isNull();
+		Assertions.assertThat(NeoRxBoltClientImpl.convertParameterValueType(mapper.createArrayNode().add("a")))
+				.isInstanceOf(List.class);
+		Assertions.assertThat(NeoRxBoltClientImpl.convertParameterValueType(mapper.createArrayNode().add(1).add(2)))
+				.isInstanceOf(List.class);
+		Assertions.assertThat(NeoRxBoltClientImpl.convertParameterValueType(mapper.createObjectNode()))
+				.isInstanceOf(Map.class);
+		Assertions.assertThat(NeoRxBoltClientImpl.convertParameterValueType(mapper.createObjectNode().path("foo")))
+				.isNull();
 		Assertions.assertThat(NeoRxBoltClientImpl.convertParameterValueType(NullNode.getInstance())).isNull();
 		Assertions.assertThat(NeoRxBoltClientImpl.convertParameterValueType(MissingNode.getInstance())).isNull();
 		Assertions.assertThat(NeoRxBoltClientImpl.convertParameterValueType(mapper.readTree("123"))).isEqualTo(123);
-		Assertions.assertThat(NeoRxBoltClientImpl.convertParameterValueType(mapper.readTree("123.45"))).isEqualTo(123.45);
+		Assertions.assertThat(NeoRxBoltClientImpl.convertParameterValueType(mapper.readTree("123.45")))
+				.isEqualTo(123.45);
 	}
-	
+
 	@Test
-	public void testCollect1() throws IOException, JsonProcessingException{
+	public void testCollect1() throws IOException, JsonProcessingException {
 		getClient().execCypher("match (a:JUnitPerson) detach delete a");
-		getClient().execCypher("create (p:JUnitPerson {name: \"Mark\"})\n" + 
-				"create (e1:JUnitEvent {name: \"Event1\", timestamp: 1234})\n" + 
-				"create (e2:JUnitEvent {name: \"Event2\", timestamp: 4567})\n" + 
-				" \n" + 
-				"create (p)-[:EVENT]->(e1)\n" + 
-				"create (p)-[:EVENT]->(e2)\n");
-		
-		JsonNode n = getClient().execCypher(
-				"MATCH (p:JUnitPerson)-[:EVENT]->(e)\n" + 
-				" RETURN p, COLLECT({eventName: e.name, eventTimestamp: e.timestamp}) as x").blockingFirst();
+		getClient().execCypher("create (p:JUnitPerson {name: \"Mark\"})\n"
+				+ "create (e1:JUnitEvent {name: \"Event1\", timestamp: 1234})\n"
+				+ "create (e2:JUnitEvent {name: \"Event2\", timestamp: 4567})\n" + " \n" + "create (p)-[:EVENT]->(e1)\n"
+				+ "create (p)-[:EVENT]->(e2)\n");
+
+		JsonNode n = getClient().execCypher("MATCH (p:JUnitPerson)-[:EVENT]->(e)\n"
+				+ " RETURN p, COLLECT({eventName: e.name, eventTimestamp: e.timestamp}) as x").blockingFirst();
 		Assertions.assertThat(n.path("p").path("name").asText()).isEqualTo("Mark");
 		n.path("x").forEach(it -> {
 			if (it.path("eventName").asText().equals("Event1")) {
@@ -540,23 +552,24 @@ public class NeoRxClientTest {
 			if (it.path("eventName").asText().equals("Event2")) {
 				Assertions.assertThat(it.path("eventTimestamp").asInt()).isEqualTo(4567);
 			}
-			
+
 		});
 		Assertions.assertThat(n.path("x").size()).isEqualTo(2);
-		
 
 	}
+
 	@Test
-	public void testCollect() throws IOException{
-		
+	public void testCollect() throws IOException {
+
 		String id = UUID.randomUUID().toString();
-		getClient().execCypher("create (a:JUnitSingleton {id:{id}}) return a","id",id);
-		
-		
-		JsonNode n = getClient().execCypher("match (a:JUnitSingleton {id:{id}}) return a, collect({x:[{w:true,p:'hello'}],y:2,z:null}) as b","id",id).blockingLast();
-		
+		getClient().execCypher("create (a:JUnitSingleton {id:{id}}) return a", "id", id);
+
+		JsonNode n = getClient().execCypher(
+				"match (a:JUnitSingleton {id:{id}}) return a, collect({x:[{w:true,p:'hello'}],y:2,z:null}) as b", "id",
+				id).blockingLast();
+
 		System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(n));
-	
+
 		Assertions.assertThat(n.path("a").path("id").asText()).isEqualTo(id);
 		Assertions.assertThat(n.path("b").isArray()).isTrue();
 		Assertions.assertThat(n.path("b").size()).isEqualTo(1);
@@ -564,6 +577,6 @@ public class NeoRxClientTest {
 		Assertions.assertThat(n.path("b").path(0).path("z").isNull()).isTrue();
 		Assertions.assertThat(n.path("b").path(0).path("x").get(0).path("p").asText()).isEqualTo("hello");
 		Assertions.assertThat(n.path("b").path(0).path("x").get(0).path("w").asBoolean()).isTrue();
-		
+
 	}
 }
