@@ -2,7 +2,6 @@ package org.lendingclub.neorx.mock;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.lendingclub.neorx.mock.MockNeoRxClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -18,4 +17,7 @@ public class MockNeoRxClientTest {
 		Assertions.assertThat(client.execCypher("foo").blockingFirst().path("a").asInt()).isEqualTo(2);
 		
 	}
+	
+
+	
 }

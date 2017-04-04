@@ -19,12 +19,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.BooleanNode;
-import com.fasterxml.jackson.databind.node.DecimalNode;
-import com.fasterxml.jackson.databind.node.DoubleNode;
-import com.fasterxml.jackson.databind.node.FloatNode;
-import com.fasterxml.jackson.databind.node.IntNode;
-import com.fasterxml.jackson.databind.node.LongNode;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -44,50 +38,58 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 		this.driver = driver;
 	}
 
-	static JsonNode toJson(Node n) {
-		JsonNode node = mapper.convertValue(n.asMap(), JsonNode.class);
+	
+	@SuppressWarnings("unchecked")
+	static JsonNode convertResultToJson(Object obj) {
+		if (obj == null) {
+			return NullNode.instance;
+		} else if (obj instanceof JsonNode) {
+			// this should not happen, but passing it through is fine
+			return (JsonNode) obj;
+		} else if (obj instanceof List) {
 
-		return node;
-	}
-
-	static JsonNode toObjectNode(Record record) {
-
-		JsonNode rval = NullNode.getInstance();
-		if (record == null) {
-
-			return NullNode.getInstance();
-		}
-		Map<String, Object> m = record.asMap();
-		if (m.size() == 1) {
-			Object val = m.values().iterator().next();
-			if (val instanceof Node) {
-				rval = toJson((Node) val);
-			} else {
-				rval = mapper.convertValue(val, JsonNode.class);
-			}
-		} else {
-
-			ObjectNode n = mapper.createObjectNode();
-			m.entrySet().forEach(it -> {
-
-				Object val = it.getValue();
-				if (val instanceof Node) {
-					Node node = (Node) val;
-					n.set(it.getKey(), toJson(node));
-				} else {
-					n.set(it.getKey(), mapper.convertValue(it.getValue(), JsonNode.class));
-				}
-
+			List<Object> x = (List<Object>) obj;
+			ArrayNode n = mapper.createArrayNode();
+			x.forEach(it -> {
+				n.add(convertResultToJson(it));
 			});
-			rval = n;
+			return n;
+		} else if (obj instanceof Node) {
+			ObjectNode x = mapper.createObjectNode();
+			Node node = (Node) obj;
+			Map<String,Object> m = node.asMap();
+			m.forEach((k, v) -> {
+				x.set(k.toString(), convertResultToJson(v));
+			});
+			return x;
+		}
+		else if (obj instanceof Record) {
+		
+			Record record = (Record) obj;
+			
+			Map<String, Object> m = record.asMap();
+			
+			if (m.size() == 1) {
+				// If we have one element in the record, then "unwrap" it
+				return convertResultToJson(m.values().iterator().next());		
+			} else {
+				ObjectNode n = mapper.createObjectNode();
+				m.entrySet().forEach(it -> {
+					n.set(it.getKey(),convertResultToJson(it.getValue()));
+				});
+				return n;
+			}
+
+	
 		}
 
-		if (rval == null) {
-			rval = NullNode.getInstance();
+		else {
+			return mapper.convertValue(obj, JsonNode.class);
 		}
-		return rval;
 
 	}
+
+
 
 	static List<JsonNode> toList(StatementResult sr) {
 		try {
@@ -96,7 +98,7 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 
 				Record record = sr.next();
 
-				JsonNode n = toObjectNode(record);
+				JsonNode n = convertResultToJson(record);
 
 				list.add(n);
 
@@ -107,7 +109,7 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 		}
 	}
 
-	static Object convertValueType(Object input) {
+	static Object convertParameterValueType(Object input) {
 		Object rval = input;
 		if (input == null) {
 			rval = null; // unnecessary, but clear
@@ -161,7 +163,7 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 							+ "alternating key and value. Arguments were: " + Arrays.toString(keysAndValues) + "."));
 		}
 		for (int i = 0; i < keysAndValues.length; i += 2) {
-			keysAndValues[i + 1] = convertValueType(keysAndValues[i + 1]);
+			keysAndValues[i + 1] = convertParameterValueType(keysAndValues[i + 1]);
 
 		}
 
@@ -173,7 +175,7 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 		List<Object> list = new LinkedList<>();
 		args.fields().forEachRemaining(it -> {
 			list.add(it.getKey());
-			list.add(convertValueType(it.getValue()));
+			list.add(convertParameterValueType(it.getValue()));
 		});
 
 		return execCypher(cypher, list.toArray());

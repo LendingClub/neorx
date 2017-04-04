@@ -4,12 +4,13 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 
+@SuppressWarnings("unused")
 public class DocumentationExamples {
 
 	NeoRxClient client;
+	
 	
 	public void d1() {
 		NeoRxClient client = new NeoRxClient.Builder().build();
@@ -27,7 +28,7 @@ public class DocumentationExamples {
 	}
 
 	public void d4() {
-		NeoRxClient client = null;
+	
 		client.execCypher("match (p:Person) where p.born>1980 return p").subscribe(new Consumer<JsonNode>() {
 			public void accept(JsonNode it) throws Exception {
 				System.out.println(it.path("p.name").asText() + " - " + it.path("p.born").asInt());

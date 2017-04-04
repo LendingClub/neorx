@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.reactivex.Observable;
 
-class NeoRxClientDelegate extends NeoRxClient {
+class NeoRxClientFacade extends NeoRxClient {
 
 	NeoRxClient client;
 
