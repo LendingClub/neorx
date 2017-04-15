@@ -114,7 +114,7 @@ client.execCypher("MERGE (x:Dummy {name: "something" }) set x += {props} return 
 ## Obtaining
 
 
-NeoRx is available from maven central:
+NeoRx is available from JCenter from the following coordinates:
 
 ```xml
 <dependency>
@@ -130,6 +130,7 @@ or with Gradle:
 compile "org.lendinglcub.neorx:neorx:2.0.3"
 ```
 
+Note: Artifcacts are not *yet* published to maven central.  We are working on that.
 
 ## Changes
 ### 2.0.3 
