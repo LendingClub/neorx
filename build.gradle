@@ -5,7 +5,7 @@ apply plugin: 'maven'
 apply plugin: "jacoco"
 
 group 'org.lendingclub.neorx'
-version = "2.0.2"
+version = "2.0.3"
 configurations {
 	//all*.exclude group: 'org.codehaus.groovy', module: 'groovy'
 	all*.exclude group: 'log4j'
