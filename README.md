@@ -130,7 +130,7 @@ or with Gradle:
 compile "org.lendinglcub.neorx:neorx:2.0.3"
 ```
 
-Note: Artifcacts are not *yet* published to maven central.  We are working on that.
+Note: Artifacts are not *yet* published to maven central.  We are working on that.
 
 ## Changes
 ### 2.0.3 
