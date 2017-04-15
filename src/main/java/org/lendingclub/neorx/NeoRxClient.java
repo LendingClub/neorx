@@ -2,6 +2,7 @@ package org.lendingclub.neorx;
 
 import java.util.List;
 
+import org.lendingclub.neorx.mock.MockNeoRxClient;
 import org.neo4j.driver.v1.AuthToken;
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Config;
@@ -62,7 +63,7 @@ public abstract class NeoRxClient {
 		Driver driver;
 		Config config = Config.defaultConfig();
 		AuthToken authToken = AuthTokens.none();
-		
+		boolean mock = false;
 		public Builder withDriver(Driver driver) {
 			this.driver = driver;
 			return this;
@@ -86,8 +87,16 @@ public abstract class NeoRxClient {
 			this.authToken = authToken;
 			return this;
 		}
-		public NeoRxClient build() {
+		public Builder withMockClient(boolean b) {
+			this.mock = b;
+			return this;
+		}
+		public <T extends NeoRxClient> T build() {
 
+			if (mock==true) {
+				logger.warn("MockNeoRxClient is enabled!");
+				return (T) new MockNeoRxClient();
+			}
 			if (driver == null) {
 
 				if (GuavaStrings.isNullOrEmpty(url)) {
@@ -98,7 +107,7 @@ public abstract class NeoRxClient {
 				this.driver = GraphDatabase.driver(url,authToken,config);
 
 			}
-			return new NeoRxBoltClientImpl(driver);
+			return (T) new NeoRxBoltClientImpl(driver);
 
 		}
 

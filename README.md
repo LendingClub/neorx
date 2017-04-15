@@ -120,18 +120,21 @@ NeoRx is available from maven central:
 <dependency>
   <groupId>org.lendingclub.neorx</groupId>
   <artifactId>neorx</artifactId>
-  <version>2.0.2</version>
+  <version>2.0.3</version>
 </dependency>
 ```
 
 or with Gradle:
 
 ```groovy
-compile "org.lendinglcub.neorx:neorx:2.0.2"
+compile "org.lendinglcub.neorx:neorx:2.0.3"
 ```
 
 
 ## Changes
+### 2.0.3 
+* Gradle 3.5
+* Expose MockNeoRxClient in builder
 
 ### 2.0.2
 * fix handling of complex nested return types from COLLECT(), etc.

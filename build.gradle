@@ -38,11 +38,11 @@ dependencies {
 	
 	testCompile "ch.qos.logback:logback-classic:${LOGBACK_VERSION}"
 	testCompile "org.slf4j:jul-to-slf4j:${SLF4J_VERSION}"
-	testCompile "com.google.guava:guava:18.0"  //  <<-- test scope only!
+	testCompile "com.google.guava:guava:21.0"  //  <<-- test scope only!
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.4.1'
+    gradleVersion = '3.5'
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
