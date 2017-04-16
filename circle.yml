@@ -1,6 +1,6 @@
 machine:
     pre:
-        - sudo ./neorx/tools/circle_setup.sh
+        - sudo ./neorx/.ci/circle-setup.sh
     services:
         - neo4j
     java:
