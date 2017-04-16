@@ -1,8 +1,6 @@
 machine:
     pre:
-        - sudo ./neorx/.ci/circle-setup.sh
-    services:
-        - neo4j
+        - pwd
     java:
         version: oraclejdk8
     environment:
@@ -16,6 +14,8 @@ general:
         
         
 test:
+    pre:
+        - sudo ./neorx/.ci/circle-setup.sh
     override:
         - ./gradlew clean check install
     post:
