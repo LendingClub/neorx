@@ -585,45 +585,65 @@ public class NeoRxClientTest {
 		Assertions.assertThat(n.path("b").path(0).path("x").get(0).path("w").asBoolean()).isTrue();
 
 	}
-	
+
 	@Test
 	public void testBuilder() {
 		Assertions.assertThat(NeoRxClient.builder()).isInstanceOf(Builder.class);
-		
+
 		NeoRxClient.Builder b = NeoRxClient.builder();
 		Assertions.assertThat(b.authToken).isEqualTo(AuthTokens.none());
 		Assertions.assertThat(b.withCredentials("scott", "tiger").authToken).isNotNull();
-		
+
 		AuthToken token = AuthTokens.basic("abc", "def");
-		
+
 		Assertions.assertThat(b.withAuthToken(token).authToken).isSameAs(token);
-		
+
 		Assertions.assertThat(b.driver).isNull();
 		Driver d = GraphDatabase.driver("bolt://localhost:1234");
 		Assertions.assertThat(b.withDriver(d).driver).isSameAs(d);
-		
+
 		b = NeoRxClient.builder();
 		Assertions.assertThat(b.mock).isFalse();
 		Assertions.assertThat(b.withMockClient(true).mock).isTrue();
-		
+
 	}
-	
+
 	@Test
 	public void testMock() {
 		NeoRxClient.Builder b = NeoRxClient.builder();
 		Assertions.assertThat(b.mock).isFalse();
 		Assertions.assertThat(b.withMockClient(true).mock).isTrue();
-		
+
 		NeoRxClient c = b.build();
 		Assertions.assertThat(c).isInstanceOf(MockNeoRxClient.class);
 	}
-	
+
 	@Test
 	public void testExecCypherAsListJsonArg() {
 		String id = UUID.randomUUID().toString();
 		ObjectNode n = mapper.createObjectNode().put("id", id);
-		Assertions.assertThat(getClient().execCypherAsList("create (a:JUnitFoo) set a.id={id} return a",n).get(0).path("id").asText()).isEqualTo(id);
+		Assertions.assertThat(getClient().execCypherAsList("create (a:JUnitFoo) set a.id={id} return a", n).get(0)
+				.path("id").asText()).isEqualTo(id);
 	}
-	
-	
+
+	@Test
+	public void testCannotConnect() {
+		try {
+			NeoRxClient.builder().withUrl("bol://127.0.0.1:12345").build().execCypher("match (a:Foo) return a limit 10");
+			Assertions.failBecauseExceptionWasNotThrown(NeoRxException.class);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assertions.assertThat(e).isInstanceOf(NeoRxException.class).hasCauseInstanceOf(ClientException.class);
+		}
+	}
+	@Test
+	public void testSyntaxError() {
+		try {
+			getClient().execCypher("match (a:Foo return a");
+			Assertions.failBecauseExceptionWasNotThrown(NeoRxException.class);
+		} catch (Exception e) {
+			Assertions.assertThat(e).isInstanceOf(NeoRxException.class).hasCauseInstanceOf(ClientException.class);
+		}
+	}
+
 }

@@ -38,10 +38,7 @@ public class MockNeoRxClient extends NeoRxClient {
 		return Observable.fromIterable(queue.removeFirst());
 	}
 
-	@Override
-	public Observable<JsonNode> execCypher(String cypher, ObjectNode params) {
-		return Observable.fromIterable(queue.removeFirst());
-	}
+	
 
 	public Driver getDriver() {
 		throw new UnsupportedOperationException();

@@ -113,8 +113,6 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 		Object rval = input;
 		if (input == null) {
 			rval = null; // unnecessary, but clear
-		} else if (input.getClass().isPrimitive()) {
-			rval = input;
 		} else if (input instanceof String) {
 			rval = input;
 		} else if (input instanceof ObjectNode) {
@@ -140,8 +138,6 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 				rval = vn.booleanValue();
 			} else if (vn.isDouble()) {
 				rval = vn.asDouble();
-			} else if (vn.isInt()) {
-				rval = vn.asInt();
 			}
 		}
 
@@ -171,15 +167,7 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 
 	}
 
-	public io.reactivex.Observable<JsonNode> execCypher(String cypher, ObjectNode args) {
-		List<Object> list = new LinkedList<>();
-		args.fields().forEachRemaining(it -> {
-			list.add(it.getKey());
-			list.add(convertParameterValueType(it.getValue()));
-		});
 
-		return execCypher(cypher, list.toArray());
-	}
 
 	public Observable<JsonNode> execCypher(String cypher, Object... args) {
 		// Note that there is nothing reactive, async or efficient about this.

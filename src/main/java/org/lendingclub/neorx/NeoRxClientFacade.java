@@ -11,6 +11,9 @@ class NeoRxClientFacade extends NeoRxClient {
 
 	NeoRxClient client;
 
+	protected NeoRxClientFacade(NeoRxClient client) {
+		this.client = client;
+	}
 	@Override
 	public boolean checkConnection() {
 		return client.checkConnection();
@@ -18,11 +21,6 @@ class NeoRxClientFacade extends NeoRxClient {
 
 	@Override
 	public Observable<JsonNode> execCypher(String cypher, Object... params) {
-		return client.execCypher(cypher, params);
-	}
-
-	@Override
-	public Observable<JsonNode> execCypher(String cypher, ObjectNode params) {
 		return client.execCypher(cypher, params);
 	}
 

@@ -16,6 +16,15 @@ public class MockNeoRxClientTest {
 		Assertions.assertThat(client.execCypher("foo").blockingFirst().path("a").asInt()).isEqualTo(1);
 		Assertions.assertThat(client.execCypher("foo").blockingFirst().path("a").asInt()).isEqualTo(2);
 		
+		Assertions.assertThat(client.checkConnection()).isTrue();
+		
+		try {
+			client.getDriver();
+			Assertions.failBecauseExceptionWasNotThrown(UnsupportedOperationException.class);
+		}
+		catch (Exception e) {
+			Assertions.assertThat(e).isInstanceOf(UnsupportedOperationException.class);
+		}
 	}
 	
 
