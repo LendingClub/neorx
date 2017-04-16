@@ -10,6 +10,10 @@ curl 'https://neo4j.com/artifact.php?name=neo4j-community-3.1.3-unix.tar.gz' -o 
 tar zxvf neo4j.tgz
 cd neo4j-community*
 
+JAVA_HOME=$(find /usr/lib/jvm  -maxdepth 1 -type d -name 'jdk1.8*' | head -1)
+PATH=$JAVA_HOME/bin:$PATH
+export JAVA_HOME PATH
+
 cat <<EOF >>./conf/neo4j.conf
 dbms.security.auth_enabled=false
 dbms.memory.pagecache.size=100m
