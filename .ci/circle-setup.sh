@@ -1,6 +1,12 @@
 #!/bin/bash
 
-ps -ef | grep neo4j | grep java | grep -v grep | awk '{ print $2 }' | sudo xargs kill
+# Stop some stuff and free up some memory
+sudo service mysql stop
+sudo service postgresql stop
+sudo service rabbitmq-server stop
+sudo service redis-server stop
+sudo service zookeeper stop
+sudo service neo4j-service stop
 
 #sudo sed -i.bak 's/auth_enabled=true/auth_enabled=false/' /var/lib/neo4j/conf/neo4j-server.properties
 #sudo echo "dbms.pagecache.memory=100m" >>/var/lib/neo4j/conf/neo4j-server.properties#!/bin/bash
