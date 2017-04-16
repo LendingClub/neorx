@@ -1,8 +1,6 @@
 machine:
     pre:
-        - sudo ./neorx/tools/circle_setup.sh
-    services:
-        - neo4j
+        - sudo /home/ubuntu/neorx/.ci/circle-setup.sh
     java:
         version: oraclejdk8
     environment:
