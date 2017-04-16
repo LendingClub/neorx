@@ -19,7 +19,13 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.lendingclub.neorx.NeoRxClient.Builder;
+import org.lendingclub.neorx.mock.MockNeoRxClient;
+import org.neo4j.driver.v1.AuthToken;
+import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Config;
+import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.GraphDatabase;
 import org.neo4j.driver.v1.exceptions.ClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -579,4 +585,45 @@ public class NeoRxClientTest {
 		Assertions.assertThat(n.path("b").path(0).path("x").get(0).path("w").asBoolean()).isTrue();
 
 	}
+	
+	@Test
+	public void testBuilder() {
+		Assertions.assertThat(NeoRxClient.builder()).isInstanceOf(Builder.class);
+		
+		NeoRxClient.Builder b = NeoRxClient.builder();
+		Assertions.assertThat(b.authToken).isEqualTo(AuthTokens.none());
+		Assertions.assertThat(b.withCredentials("scott", "tiger").authToken).isNotNull();
+		
+		AuthToken token = AuthTokens.basic("abc", "def");
+		
+		Assertions.assertThat(b.withAuthToken(token).authToken).isSameAs(token);
+		
+		Assertions.assertThat(b.driver).isNull();
+		Driver d = GraphDatabase.driver("bolt://localhost:1234");
+		Assertions.assertThat(b.withDriver(d).driver).isSameAs(d);
+		
+		b = NeoRxClient.builder();
+		Assertions.assertThat(b.mock).isFalse();
+		Assertions.assertThat(b.withMockClient(true).mock).isTrue();
+		
+	}
+	
+	@Test
+	public void testMock() {
+		NeoRxClient.Builder b = NeoRxClient.builder();
+		Assertions.assertThat(b.mock).isFalse();
+		Assertions.assertThat(b.withMockClient(true).mock).isTrue();
+		
+		NeoRxClient c = b.build();
+		Assertions.assertThat(c).isInstanceOf(MockNeoRxClient.class);
+	}
+	
+	@Test
+	public void testExecCypherAsListJsonArg() {
+		String id = UUID.randomUUID().toString();
+		ObjectNode n = mapper.createObjectNode().put("id", id);
+		Assertions.assertThat(getClient().execCypherAsList("create (a:JUnitFoo) set a.id={id} return a",n).get(0).path("id").asText()).isEqualTo(id);
+	}
+	
+	
 }
