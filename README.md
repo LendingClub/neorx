@@ -2,6 +2,7 @@
 
 [![Circle CI](https://circleci.com/gh/LendingClub/neorx.svg?style=svg)](https://circleci.com/gh/LendingClub/neorx)
 [ ![Download](https://api.bintray.com/packages/lendingclub/OSS/NeoRx/images/download.svg) ](https://bintray.com/lendingclub/OSS/NeoRx/_latestVersion)
+[![codecov](https://codecov.io/gh/LendingClub/neorx/branch/master/graph/badge.svg)](https://codecov.io/gh/LendingClub/neorx)
 
 NeoRx is a Neo4j client implemented using the Neo4j BOLT driver.  The goal is to provide a simple,fluent, json-native API that focuses on ease-of-use.
 
