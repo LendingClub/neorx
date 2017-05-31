@@ -128,7 +128,7 @@ NeoRx is available from JCenter from the following coordinates:
 or with Gradle:
 
 ```groovy
-compile "org.lendinglcub.neorx:neorx:2.0.3"
+compile "org.lendingclub.neorx:neorx:2.0.3"
 ```
 
 Note: Artifacts are not *yet* published to maven central.  We are working on that.
