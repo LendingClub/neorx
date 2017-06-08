@@ -9,7 +9,7 @@ import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Config;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
-import org.neo4j.driver.v1.exceptions.ClientException;
+import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.exceptions.Neo4jException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,20 +22,51 @@ import io.reactivex.Observable;
 public abstract class NeoRxClient {
 
 	public abstract boolean checkConnection();
+    public abstract Driver getDriver();
 
-	public abstract Observable<JsonNode> execCypher(String cypher, Object... params);
+    /**
+     * Executes the provided cypher.
+     * @param cypher cypher to execute
+     * @param session session to use. Requires manual closing of the session to commit the transaction
+     * @param args cypher args
+     * @return
+     */
+    public abstract Observable<JsonNode> execCypher(String cypher, Session session, Object... args);
 
+    /**
+     * Executes the provided cypher in a single transaction.
+     * @param cypher cypher to execute
+     * @param args cypher args
+     * @return
+     */
+    public abstract Observable<JsonNode> execCypher(String cypher, Object... args);
 
-	public final io.reactivex.Observable<JsonNode> execCypher(String cypher, ObjectNode args) {
-		List<Object> list = new LinkedList<>();
-		args.fields().forEachRemaining(it -> {
-			list.add(it.getKey());
-			list.add(NeoRxBoltClientImpl.convertParameterValueType(it.getValue()));
-		});
+    /**
+     * Executes the provided cypher.
+     * @param cypher cypher to execute
+     * @param session session to use. Requires manual closing of the session to commit the transaction
+     * @param args cypher args
+     * @return
+     */
+    public final Observable<JsonNode> execCypher(String cypher, Session session, ObjectNode args) {
+        List<Object> list = new LinkedList<>();
+        args.fields().forEachRemaining(it -> {
+            list.add(it.getKey());
+            list.add(NeoRxBoltClientImpl.convertParameterValueType(it.getValue()));
+        });
+        return execCypher(cypher, session, list.toArray());
+    }
 
-		return execCypher(cypher, list.toArray());
+    /**
+     * Executes the provided cypher in a single transaction.
+     * @param cypher cypher to execute
+     * @param args cypher args
+     * @return
+     */
+	public final Observable<JsonNode> execCypher(String cypher, ObjectNode args) {
+		return execCypher(cypher, getDriver().session(), args);
 	}
-	
+
 	public static Builder builder() {
 		return new Builder();
 	}
@@ -43,7 +74,7 @@ public abstract class NeoRxClient {
 	/**
 	 * Convenience method for returning neo4j results as a List. Same as:
 	 * client.execCypher(s,params).toList().toBlocking().first()
-	 * 
+	 *
 	 * @param cypher
 	 * @param params
 	 * @return List of JsonNode
@@ -52,12 +83,10 @@ public abstract class NeoRxClient {
 		return execCypher(cypher, params).toList().blockingGet();
 	}
 
-	public abstract Driver getDriver();
-
 	/**
 	 * Convenience method for returning neo4j results as a List. Same as:
 	 * client.execCypher(s,params).toList().toBlocking().first()
-	 * 
+	 *
 	 * @param cypher
 	 * @param params
 	 * @return List of JsonNode
@@ -108,7 +137,7 @@ public abstract class NeoRxClient {
 		@SuppressWarnings("unchecked")
 		public <T extends NeoRxClient> T build() {
 
-			if (mock == true) {
+			if (mock) {
 				logger.warn("MockNeoRxClient is enabled!");
 				return (T) new MockNeoRxClient();
 			}
@@ -126,11 +155,7 @@ public abstract class NeoRxClient {
 				}
 
 			}
-
 			return (T) new NeoRxBoltClientImpl(driver);
-
 		}
-
 	}
-
 }
