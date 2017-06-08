@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import io.reactivex.ObservableEmitter;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
@@ -29,16 +30,14 @@ import io.reactivex.Observable;
 
 class NeoRxBoltClientImpl extends NeoRxClient {
 
-	Driver driver;
-
-	static Logger logger = LoggerFactory.getLogger(NeoRxBoltClientImpl.class);
-	static ObjectMapper mapper = new ObjectMapper();
+	private final Driver driver;
+	private static final Logger logger = LoggerFactory.getLogger(NeoRxBoltClientImpl.class);
+	private static final ObjectMapper mapper = new ObjectMapper();
 
 	protected NeoRxBoltClientImpl(Driver driver) {
 		this.driver = driver;
 	}
 
-	
 	@SuppressWarnings("unchecked")
 	static JsonNode convertResultToJson(Object obj) {
 		if (obj == null) {
@@ -47,65 +46,43 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 			// this should not happen, but passing it through is fine
 			return (JsonNode) obj;
 		} else if (obj instanceof List) {
-
 			List<Object> x = (List<Object>) obj;
 			ArrayNode n = mapper.createArrayNode();
-			x.forEach(it -> {
-				n.add(convertResultToJson(it));
-			});
+			x.forEach(it -> n.add(convertResultToJson(it)));
 			return n;
 		} else if (obj instanceof Node) {
 			ObjectNode x = mapper.createObjectNode();
 			Node node = (Node) obj;
 			Map<String,Object> m = node.asMap();
-			m.forEach((k, v) -> {
-				x.set(k.toString(), convertResultToJson(v));
-			});
+			m.forEach((k, v) -> x.set(k, convertResultToJson(v)));
 			return x;
-		}
-		else if (obj instanceof Record) {
-		
+		} else if (obj instanceof Record) {
+
 			Record record = (Record) obj;
-			
+
 			Map<String, Object> m = record.asMap();
-			
+
 			if (m.size() == 1) {
 				// If we have one element in the record, then "unwrap" it
-				return convertResultToJson(m.values().iterator().next());		
+				return convertResultToJson(m.values().iterator().next());
 			} else {
 				ObjectNode n = mapper.createObjectNode();
-				m.entrySet().forEach(it -> {
-					n.set(it.getKey(),convertResultToJson(it.getValue()));
-				});
+				m.forEach((key, value) -> n.set(key, convertResultToJson(value)));
 				return n;
 			}
-
-	
-		}
-
-		else {
+		} else {
 			return mapper.convertValue(obj, JsonNode.class);
 		}
-
 	}
 
-
-
-	static List<JsonNode> toList(StatementResult sr) {
+	private static void emitEvents(StatementResult sr, ObservableEmitter<JsonNode> emitter) {
 		try {
-			List<JsonNode> list = new LinkedList<>();
 			while (sr.hasNext()) {
-
 				Record record = sr.next();
-
-				JsonNode n = convertResultToJson(record);
-
-				list.add(n);
-
+				emitter.onNext(convertResultToJson(record));
 			}
-			return list;
 		} catch (ClientException e) {
-			throw new NeoRxException(e.getMessage(), e);
+			emitter.onError(e);
 		}
 	}
 
@@ -132,9 +109,7 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 				rval = vn.asLong();
 			} else if (vn.isInt()) {
 				rval = vn.asInt();
-			}
-
-			else if (vn.isBoolean()) {
+			} else if (vn.isBoolean()) {
 				rval = vn.booleanValue();
 			} else if (vn.isDouble()) {
 				rval = vn.asDouble();
@@ -148,7 +123,7 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 		return rval;
 	}
 
-	protected static Object[] convertExtraTypes(Object... keysAndValues) {
+	private static Object[] convertExtraTypes(Object... keysAndValues) {
 		if (keysAndValues.length % 2 != 0) {
 			// we throw the same client exception as the underlying Driver
 			// would, but wrap it for consistency with
@@ -160,35 +135,37 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 		}
 		for (int i = 0; i < keysAndValues.length; i += 2) {
 			keysAndValues[i + 1] = convertParameterValueType(keysAndValues[i + 1]);
-
 		}
-
 		return keysAndValues;
-
 	}
 
+	@Override
+	public Observable<JsonNode> execCypher(String cypher, Session session,  Object... args) {
+		return _execCypher(cypher, session, true, args);
+	}
 
-
-	public Observable<JsonNode> execCypher(String cypher, Object... args) {
-		// Note that there is nothing reactive, async or efficient about this.
-		// But it is VERY usable.
-		Session session = driver.session();
-		try {
-			if (logger.isDebugEnabled()) {
-				logger.debug("cypher={}", cypher);
+	private Observable<JsonNode> _execCypher(String cypher, Session session, boolean clientManagesSession,  Object... args) {
+		return Observable.create(emitter -> {
+			try {
+				if (logger.isDebugEnabled()) {
+					logger.debug("cypher={}", cypher);
+				}
+				StatementResult result = session.run(cypher, parameters(convertExtraTypes(args)));
+				emitEvents(result, emitter);
+			} catch (ClientException e) {
+				emitter.onError(e);
+			} finally {
+				emitter.onComplete();
+				if (!clientManagesSession) {
+					session.close();
+				}
 			}
+		});
+	}
 
-			StatementResult result = session.run(cypher, parameters(convertExtraTypes(args)));
-			// This is inefficient to take the result, turn it into a list and
-			// then back into an Observable.
-			// We will enhance this to stream the statement result as an
-			// Observable directly
-			return Observable.fromIterable(toList(result));
-		} catch (ClientException e) {
-			throw new NeoRxException(e.getMessage(), e);
-		} finally {
-			session.close();
-		}
+	@Override
+	public Observable<JsonNode> execCypher(String cypher, Object... args) {
+		return _execCypher(cypher, driver.session(), false, args);
 	}
 
 	public Driver getDriver() {
@@ -198,7 +175,7 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 	@Override
 	public boolean checkConnection() {
 		try {
-			execCypher("match (a:Check__Session) return count(a)");
+			execCypher("match (a:Check__Session) return count(a)").blockingFirst();
 			return true;
 		} catch (Exception e) {
 			return false;

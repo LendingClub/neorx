@@ -1,11 +1,9 @@
 package org.lendingclub.neorx;
 
-import org.neo4j.driver.v1.Driver;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.reactivex.Observable;
+import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.Session;
 
 class NeoRxClientFacade extends NeoRxClient {
 
@@ -28,6 +26,10 @@ class NeoRxClientFacade extends NeoRxClient {
 	public Driver getDriver() {
 		return client.getDriver();
 	}
-	
-	
+
+    @Override
+    public Observable<JsonNode> execCypher(String cypher, Session session, Object... args) {
+        return client.execCypher(cypher, session, args);
+    }
+
 }

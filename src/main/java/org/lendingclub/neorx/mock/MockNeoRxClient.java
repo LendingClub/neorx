@@ -9,9 +9,9 @@ import org.lendingclub.neorx.NeoRxClient;
 import org.neo4j.driver.v1.Driver;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.reactivex.Observable;
+import org.neo4j.driver.v1.Session;
 
 public class MockNeoRxClient extends NeoRxClient {
 
@@ -42,5 +42,10 @@ public class MockNeoRxClient extends NeoRxClient {
 
 	public Driver getDriver() {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Observable<JsonNode> execCypher(String cypher, Session session, Object... args) {
+		return execCypher(cypher, args);
 	}
 }
