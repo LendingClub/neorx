@@ -3,7 +3,6 @@ package org.lendingclub.neorx;
 import org.neo4j.driver.v1.Driver;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.reactivex.Observable;
 
@@ -28,6 +27,11 @@ class NeoRxClientFacade extends NeoRxClient {
 	public Driver getDriver() {
 		return client.getDriver();
 	}
+	@Override
+	public CypherStats getStats() {
+		return super.getStats();
+	}
+	
 	
 	
 }

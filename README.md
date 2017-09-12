@@ -128,12 +128,16 @@ NeoRx is available from JCenter from the following coordinates:
 or with Gradle:
 
 ```groovy
-compile "org.lendingclub.neorx:neorx:2.0.3"
+compile "org.lendinglcub.neorx:neorx:2.0.3"
 ```
 
 Note: Artifacts are not *yet* published to maven central.  We are working on that.
 
 ## Changes
+
+### 2.0.4
+* Add CypherStats
+* neo4j-java-driver 1.2.2
 ### 2.0.3 
 * Gradle 3.5
 * Expose MockNeoRxClient in builder

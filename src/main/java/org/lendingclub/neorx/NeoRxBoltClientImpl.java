@@ -172,6 +172,7 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 	public Observable<JsonNode> execCypher(String cypher, Object... args) {
 		// Note that there is nothing reactive, async or efficient about this.
 		// But it is VERY usable.
+		long t0 = System.currentTimeMillis();
 		Session session = driver.session();
 		try {
 			if (logger.isDebugEnabled()) {
@@ -188,6 +189,9 @@ class NeoRxBoltClientImpl extends NeoRxClient {
 			throw new NeoRxException(e.getMessage(), e);
 		} finally {
 			session.close();
+			long t1 = System.currentTimeMillis();
+			cypherStats.recordCypher(cypher, t1-t0);
+		
 		}
 	}
 

@@ -10,9 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.assertj.core.api.Assertions;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.NumericNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
 import io.reactivex.Observable;
@@ -50,34 +51,32 @@ public class NeoRxClientTest {
 	static Logger logger = LoggerFactory.getLogger(NeoRxClientTest.class);
 	static NeoRxBoltClientImpl client;
 
-	@After
-	public void tearDown() {
-		if (client == null) {
-			return;
-		}
-
-		client.execCypher("MATCH (n) RETURN distinct labels(n) as labels").forEach(x -> {
-
-			if (x.isArray()) {
-				x.forEach(val -> {
-					String label = val.asText();
-					if (label.startsWith("JUnit")) {
-						logger.debug("deleting nodes of type: {}", label);
-						client.execCypher("match (n:" + label + ") detach delete n");
-					}
-
-				});
-			}
-
-		});
-	}
+	
 
 	@AfterClass
 	public static void tearDownMovieGraph() {
 		if (client != null) {
 			client.execCypher("match (p:Person) detach delete p");
 			client.execCypher("match (p:Movie) detach delete p");
+			client.execCypher("match (p:JUnit) detach delete p");
+			client.execCypher("match (p:JUnitFoo) detach delete p");
+			client.execCypher("MATCH (n) RETURN distinct labels(n) as labels").forEach(x -> {
+
+				if (x.isArray()) {
+					x.forEach(val -> {
+						String label = val.asText();
+						if (label.startsWith("JUnit")) {
+							logger.info("deleting nodes of type: {}", label);
+							client.execCypher("match (n:" + label + ") detach delete n");
+						}
+
+					});
+				}
+
+			});
 		}
+		
+		client.getStats().flush();
 	}
 
 	@BeforeClass
@@ -86,6 +85,14 @@ public class NeoRxClientTest {
 		NeoRxClient c = new NeoRxClient.Builder().withConfig(Config.build().withLeakedSessionsLogging().toConfig())
 				.build();
 
+		c.getStats().subscribe(observable->{
+			observable.filter(it->{
+				return it.getMaxTime()>200;
+			}).subscribe(it->{
+				logger.info("slow cypher: {}",it);
+			});
+		});
+		
 		if (!c.checkConnection()) {
 			logger.warn("neo4j unavailable for testing");
 			return;
@@ -412,6 +419,7 @@ public class NeoRxClientTest {
 
 	@Test
 	public void testArray() throws JsonProcessingException, IOException {
+		Stopwatch sw = Stopwatch.createStarted();
 		ObjectMapper m = new ObjectMapper();
 
 		ArrayNode an = m.createArrayNode();
@@ -429,6 +437,8 @@ public class NeoRxClientTest {
 		Assertions.assertThat(n.path("array1").get(1).asText()).isEqualTo("bar");
 		Assertions.assertThat(n.path("array2").get(0).asInt()).isEqualTo(1);
 		Assertions.assertThat(n.path("array2").get(1).asInt()).isEqualTo(2);
+		
+
 	}
 
 	@Test
@@ -514,7 +524,7 @@ public class NeoRxClientTest {
 				"val", mapper.createObjectNode().path("notfound"));
 
 		JsonNode n = getClient().execCypher("match (f:JUnitFoo {id:{id}}) return f", "id", id).blockingFirst();
-		System.out.println(n);
+	
 		Assertions.assertThat(Lists.newArrayList(n.fieldNames())).hasSize(1);
 
 	}
@@ -574,8 +584,7 @@ public class NeoRxClientTest {
 				"match (a:JUnitSingleton {id:{id}}) return a, collect({x:[{w:true,p:'hello'}],y:2,z:null}) as b", "id",
 				id).blockingLast();
 
-		System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(n));
-
+	
 		Assertions.assertThat(n.path("a").path("id").asText()).isEqualTo(id);
 		Assertions.assertThat(n.path("b").isArray()).isTrue();
 		Assertions.assertThat(n.path("b").size()).isEqualTo(1);
