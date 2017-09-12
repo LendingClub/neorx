@@ -9,13 +9,13 @@ import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Config;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
-import org.neo4j.driver.v1.exceptions.ClientException;
 import org.neo4j.driver.v1.exceptions.Neo4jException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Strings;
 
 import io.reactivex.Observable;
 
@@ -25,6 +25,7 @@ public abstract class NeoRxClient {
 
 	public abstract Observable<JsonNode> execCypher(String cypher, Object... params);
 
+	protected CypherStatsImpl cypherStats = new CypherStatsImpl();
 
 	public final io.reactivex.Observable<JsonNode> execCypher(String cypher, ObjectNode args) {
 		List<Object> list = new LinkedList<>();
@@ -35,7 +36,7 @@ public abstract class NeoRxClient {
 
 		return execCypher(cypher, list.toArray());
 	}
-	
+
 	public static Builder builder() {
 		return new Builder();
 	}
@@ -114,14 +115,13 @@ public abstract class NeoRxClient {
 			}
 			if (driver == null) {
 				try {
-					if (GuavaStrings.isNullOrEmpty(url)) {
+					if (Strings.isNullOrEmpty(url)) {
 						url = "bolt://localhost:7687";
 						logger.warn("url not specified...defaulting to: {}", url);
 					}
 
 					this.driver = GraphDatabase.driver(url, authToken, config);
-				}
-				catch (Neo4jException e) {
+				} catch (Neo4jException e) {
 					throw new NeoRxException(e);
 				}
 
@@ -131,6 +131,10 @@ public abstract class NeoRxClient {
 
 		}
 
+	}
+	
+	public CypherStats getStats() {
+		return cypherStats;
 	}
 
 }

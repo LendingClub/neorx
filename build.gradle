@@ -4,8 +4,9 @@ apply plugin: 'idea'
 apply plugin: 'maven'
 apply plugin: "jacoco"
 
+
 group 'org.lendingclub.neorx'
-version = "2.0.3"
+version = "${NEORX_VERSION}"
 configurations {
 	//all*.exclude group: 'org.codehaus.groovy', module: 'groovy'
 	all*.exclude group: 'log4j'
@@ -17,9 +18,9 @@ repositories {
    mavenLocal()
    mavenCentral()
    jcenter()
-   
-
 }
+
+
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -38,7 +39,7 @@ dependencies {
 	
 	testCompile "ch.qos.logback:logback-classic:${LOGBACK_VERSION}"
 	testCompile "org.slf4j:jul-to-slf4j:${SLF4J_VERSION}"
-	testCompile "com.google.guava:guava:21.0"  //  <<-- test scope only!
+	compile "com.google.guava:guava:21.0"  
 }
 
 task wrapper(type: Wrapper) {
@@ -103,8 +104,6 @@ uploadArchives {
         }
     }
 }
-
-
 
 jacocoTestReport {
     group = "reporting"
