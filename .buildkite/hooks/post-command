@@ -1,4 +1,4 @@
 #!/bin/bash
 
-docker stop neo4j-neorx
-docker rm neo4j-neorx
+docker stop neorx-neo4j
+docker rm neorx-neo4j
