@@ -1,6 +1,6 @@
 # NeoRx
 
-[![Circle CI](https://circleci.com/gh/LendingClub/neorx.svg?style=svg)](https://circleci.com/gh/LendingClub/neorx)
+[![Build status](https://badge.buildkite.com/2d8f2067a36601f00afe8817cc48b68b3b88c960ccbb1c0495.svg)](https://buildkite.com/lendingclub/neorx)
 [ ![Download](https://api.bintray.com/packages/lendingclub/OSS/NeoRx/images/download.svg) ](https://bintray.com/lendingclub/OSS/NeoRx/_latestVersion)
 [![codecov](https://codecov.io/gh/LendingClub/neorx/branch/master/graph/badge.svg)](https://codecov.io/gh/LendingClub/neorx)
 
