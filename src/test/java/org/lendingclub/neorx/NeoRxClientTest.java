@@ -74,9 +74,9 @@ public class NeoRxClientTest {
 				}
 
 			});
+			client.getStats().flush();
 		}
 		
-		client.getStats().flush();
 	}
 
 	@BeforeClass
