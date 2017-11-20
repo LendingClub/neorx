@@ -118,4 +118,7 @@ jacocoTestReport {
     additionalSourceDirs = files(sourceSets.main.allJava.srcDirs)
 }
 
+test {
+    testLogging.showStandardStreams = true
+}
 
