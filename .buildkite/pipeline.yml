@@ -1,3 +1,2 @@
 steps:
-  - command: "./gradlew clean check build"
-    artifact_paths: "build/reports/tests/test/**"
+  - command: "./docker-build.sh"
