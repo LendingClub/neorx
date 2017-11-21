@@ -10,6 +10,7 @@ if [ -f "$THIS_DIR/../neo4j-build-env/Dockerfile" ]; then
 fi
 docker pull $IMAGE_NAME
 
+ulimit -n 40000
 ulimit -a
 
 docker run -v $(pwd):/build -it ${IMAGE_NAME} ./gradlew clean check build
