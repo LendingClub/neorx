@@ -8,6 +8,7 @@ IMAGE_NAME=lendingclub/neo4j-build-env:latest
 if [ -f "$THIS_DIR/../neo4j-build-env/Dockerfile" ]; then
     $THIS_DIR/../neo4j-build-env/build.sh
 fi
+docker pull $IMAGE_NAME
 
 docker run -v $(pwd):/build -it ${IMAGE_NAME} ./gradlew clean check build
 
